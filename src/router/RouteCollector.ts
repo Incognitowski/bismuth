@@ -1,9 +1,8 @@
 import { RouteConfig } from "vue-router";
-import AboutRoute from "./Routes/AboutRoute";
-import HomeRoute from "./Routes/HomeRoute";
+import LoginRoute from "./Routes/LoginRoute";
 
 export default class RouteCollector {
   static routes(): Array<RouteConfig> {
-    return [AboutRoute.route(), HomeRoute.route()];
+    return [LoginRoute.route()];
   }
 }
