@@ -32,7 +32,7 @@
             >
                 LOGIN
             </v-btn>
-            <a class="white--text mt-6 mx-auto">or create an account</a>
+            <router-link to="/register" class="white--text mt-6 mx-auto">or create an account</router-link>
         </div>
     </v-card>
 </template>
@@ -51,6 +51,11 @@
         isLoading: boolean = false;
         hasErrors: boolean = false;
         errorText: string = '';
+
+        mounted() {
+            if(new AuthenticationAPI().isLoggedIn())
+                this.$router.push('/dashboard')
+        }
 
         async attemptLogin() {
             this.isLoading = true;
