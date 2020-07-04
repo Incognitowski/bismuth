@@ -1,24 +1,78 @@
 <template>
     <v-card
             dark
-            class="mx-auto"
-            max-width="344"
             outlined
+            :loading="cardLoader"
+            class="mx-auto d-flex flex-row"
     >
-        <img :src="require('../../assets/logo.svg')">
-
-        <v-card-actions>
-            <v-btn text>Button</v-btn>
-            <v-btn text>Button</v-btn>
-        </v-card-actions>
+        <div class="py-16 px-8">
+            <img alt="Bismuth Logo" height="200" width="200" class="m-16" :src="require('../../assets/logo.svg')">
+        </div>
+        <div class="py-16 px-8 d-flex flex-column" style="width: 350px">
+            <v-text-field
+                    dense
+                    outlined
+                    label="Username"
+                    v-model="username"
+                    :disabled="isLoading"
+            ></v-text-field>
+            <v-text-field
+                    dense
+                    outlined
+                    type="password"
+                    label="Password"
+                    v-model="password"
+                    :disabled="isLoading"
+            ></v-text-field>
+            <p v-if="hasErrors" class="text-wrap red--text mx-0">{{ errorText }}</p>
+            <v-btn
+                    width="100%"
+                    :disabled="isLoading"
+                    v-on:click="attemptLogin"
+            >
+                LOGIN
+            </v-btn>
+            <a class="white--text mt-6 mx-auto">or create an account</a>
+        </div>
     </v-card>
 </template>
 
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
+    import AuthenticationAPI from "@/domains/authentication/AuthenticationAPI";
+    import {AxiosError} from "axios";
+    import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
+    import LocalStorageProvider from "@/providers/LocalStorageProvider";
 
     @Component
     export default class Login extends Vue {
+        username: string = '';
+        password: string = '';
+        isLoading: boolean = false;
+        hasErrors: boolean = false;
+        errorText: string = '';
+
+        async attemptLogin() {
+            this.isLoading = true;
+            this.hasErrors = false;
+            new AuthenticationAPI().attemptLogin(this.username, this.password).then(response => {
+                const config = LocalStorageProvider.retrieve();
+                config.jwt = response.data.token;
+                LocalStorageProvider.store(config);
+                this.$router.push('/dashboard');
+            }).catch((error: AxiosError) => {
+                const exception: DefaultHTTPException = DefaultHTTPException.fromAxiosError(error);
+                this.hasErrors = true;
+                this.errorText = exception.message;
+            }).finally(() => {
+                this.isLoading = false;
+            });
+        }
+
+        get cardLoader(): string | null {
+            if (this.isLoading) return "purple darken-1";
+            return null;
+        }
 
     }
 </script>

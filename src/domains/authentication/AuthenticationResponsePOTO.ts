@@ -1,3 +1,3 @@
 class AuthenticationResponsePOTO {
-  public token!: String;
+  public token!: string;
 }

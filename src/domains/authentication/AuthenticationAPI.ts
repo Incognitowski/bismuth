@@ -9,12 +9,12 @@ export default class AthenticationAPI {
         this.authenticationREST = new AuthenticationREST();
     }
 
-    public attemptLogin(username: string, password: string) {
-        var authenticationPOTO: AuthenticationPOTO = new AuthenticationPOTO(
+    public async attemptLogin(username: string, password: string) {
+        const authenticationPOTO: AuthenticationPOTO = new AuthenticationPOTO(
             username,
             password
         );
-        return this.authenticationREST.attemptAuthentication(authenticationPOTO);
+        return await this.authenticationREST.attemptAuthentication(authenticationPOTO);
     }
 
     public isLoggedIn(): boolean {
