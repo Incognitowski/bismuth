@@ -25,10 +25,10 @@
                     :disabled="isLoading"
             ></v-text-field>
             <p v-if="hasErrors" class="text-wrap red--text mx-0">{{ errorText }}</p>
-            <v-btn
-                    width="100%"
-                    :disabled="isLoading"
-                    v-on:click="attemptLogin"
+            <v-btn color="accent"
+                   width="100%"
+                   :disabled="isLoading"
+                   v-on:click="attemptLogin"
             >
                 LOGIN
             </v-btn>
@@ -53,7 +53,10 @@
         errorText: string = '';
 
         mounted() {
-            if(new AuthenticationAPI().isLoggedIn())
+            this.$store.dispatch("appState/setLeftToolbarVisibility", false);
+            this.$store.dispatch("appState/setRightToolbarVisibility", false);
+            this.$store.dispatch("appState/setTopToolbarVisibility", false);
+            if (new AuthenticationAPI().isLoggedIn())
                 this.$router.push('/dashboard')
         }
 
@@ -64,6 +67,7 @@
                 const config = LocalStorageProvider.retrieve();
                 config.jwt = response.data.token;
                 LocalStorageProvider.store(config);
+                this.$store.dispatch("appState/setJWT", config.jwt);
                 this.$router.push('/dashboard');
             }).catch((error: AxiosError) => {
                 const exception: DefaultHTTPException = DefaultHTTPException.fromAxiosError(error);

@@ -50,7 +50,7 @@
                         v-model="passwordConfirmation"
                 ></v-text-field>
                 <p v-if="hasErrors" class="text-wrap red--text mx-0">{{ errorText }}</p>
-                <v-btn width="100%" :disabled="isLoading" v-on:click="attemptUserCreation">
+                <v-btn color='accent' width="100%" :disabled="isLoading" v-on:click="attemptUserCreation">
                     REGISTER
                 </v-btn>
                 <router-link to="/login" class="white--text mt-6 mx-auto">or login if you're already registered
@@ -85,6 +85,12 @@
         username: string = '';
         password: string = '';
         passwordConfirmation: string = '';
+
+        mounted() {
+            this.$store.dispatch("appState/setLeftToolbarVisibility", false);
+            this.$store.dispatch("appState/setRightToolbarVisibility", false);
+            this.$store.dispatch("appState/setTopToolbarVisibility", false);
+        }
 
         attemptUserCreation() {
             this.isLoading = true;

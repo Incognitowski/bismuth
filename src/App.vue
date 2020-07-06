@@ -1,5 +1,8 @@
 <template>
     <v-app>
+        <BismuthLeftToolbar/>
+        <BismuthRightToolbar/>
+        <BismuthAppBar/>
         <v-main>
             <v-container class="fill-height">
                 <AppLoader v-if="isGloballyLoading"></AppLoader>
@@ -12,11 +15,18 @@
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
     import AppLoader from "@/components/AppLoader.vue";
-    import LocalStorageProvider from "@/providers/LocalStorageProvider";
+    import BismuthAppBar from "@/components/BismuthAppBar.vue";
+    import BismuthLeftToolbar from "@/components/BismuthLeftToolbar.vue";
+    import BismuthRightToolbar from "@/components/BismuthRightToolbar.vue";
     import AuthenticationAPI from "@/domains/authentication/AuthenticationAPI";
 
     @Component({
-        components: {AppLoader}
+        components: {
+            BismuthLeftToolbar,
+            BismuthRightToolbar,
+            AppLoader,
+            BismuthAppBar
+        }
     })
     export default class App extends Vue {
 
