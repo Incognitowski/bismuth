@@ -17,10 +17,11 @@ export default class HttpProvider {
     }
 
     private static createAuthenticatedInstance() {
-        const authInstance = axios.create({
+        const instance = axios.create({
             baseURL: process.env.VUE_APP_API_URL,
         });
-        authInstance.defaults.headers["Authorization"] = LocalStorageProvider.retrieve().jwt;
-        return authInstance;
+        instance.defaults.headers["Authorization"] = LocalStorageProvider.retrieve().jwt;
+        instance.defaults.headers["Content-Type"] = "application/json";
+        return instance;
     }
 }

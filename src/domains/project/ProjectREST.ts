@@ -1,6 +1,6 @@
 import {AxiosResponse} from "axios";
 import HttpProvider from "@/providers/HttpProvider";
-import UserPOTO from "@/domains/user/UserPOTO";
+import ProjectPOTO from "@/domains/project/ProjectPOTO";
 
 export default class ProjectREST {
     private httpProvider: HttpProvider;
@@ -9,9 +9,9 @@ export default class ProjectREST {
         this.httpProvider = new HttpProvider();
     }
 
-    public async queryProjects(
+    public queryProjects(
         queryString: string
-    ): Promise<AxiosResponse<List<ProjectPOTO>>> {
+    ): Promise<AxiosResponse<Array<ProjectPOTO>>> {
         return this.httpProvider.authInstance.get("/project/search-by-name/" + queryString);
     }
 

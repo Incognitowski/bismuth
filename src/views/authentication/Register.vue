@@ -59,7 +59,7 @@
         </v-form>
         <v-snackbar
                 v-model="finishedRegistration"
-                :bottom="true"
+                bottom
                 color="success"
         >
             {{ successMessage }}

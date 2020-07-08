@@ -37,6 +37,7 @@
                             outlined
                             cache-items
                             class="mx-1"
+                            :loading="isLoading"
                             :items="searchedProjects"
                             label="Search projects"
                             :search-input.sync="projectSearchWord"
@@ -56,16 +57,60 @@
         <v-btn icon>
             <v-icon>mdi-magnify</v-icon>
         </v-btn>
+        <v-snackbar
+                v-model="hasError"
+                :timeout="4000"
+                bottom
+                color="error"
+        >
+            {{ errorMessage }}
+        </v-snackbar>
     </v-app-bar>
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
+    import ProjectPOTO from "@/domains/project/ProjectPOTO";
+    import AutocompleteObjectHolder from "@/domains/framework/autocomplete/AutocompleteObjectHolder";
+    import ProjectAPI from "@/domains/project/ProjectAPI";
+    import {AxiosError} from "axios";
+    import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
+    import ProjectCommons from "@/domains/project/ProjectCommons";
 
     @Component
     export default class BismuthAppBar extends Vue {
+        isLoading: boolean = false;
         projectSearchWord: string | null = null;
-        
+        searchedProjects: Array<AutocompleteObjectHolder<ProjectPOTO>>;
+        hasError: boolean = false;
+        errorMessage: string = '';
+
+        constructor() {
+            super();
+            this.searchedProjects = new Array<AutocompleteObjectHolder<ProjectPOTO>>();
+        }
+
+        @Watch('projectSearchWord')
+        onProjectSearchWordChange(val: string, oldVal: string) {
+            this.isLoading = true;
+            this.hasError = false;
+            new ProjectAPI().searchProjectsByString(val).then(result => {
+                this.searchedProjects = ProjectCommons.getProjectsForAutocomplete(result.data);
+            }).catch((error: AxiosError) => {
+                let message: string;
+                try {
+                    const exception = DefaultHTTPException.fromAxiosError(error);
+                    message = exception.message;
+                } catch (e) {
+                    message = error.message;
+                }
+                this.errorMessage = message;
+                this.hasError = true;
+            }).finally(() => {
+                this.isLoading = false;
+            })
+        }
+
     }
 </script>
 
