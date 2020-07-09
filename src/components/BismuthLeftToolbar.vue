@@ -4,6 +4,7 @@
             dark
             clipped
             absolute
+            permanent
             mini-variant
             expand-on-hover
             color="transparent"
@@ -12,31 +13,21 @@
         <v-list
                 dense
                 nav
-                class="py-0">
-            <v-list-item two-line :class="'px-0'">
-                <v-list-item-avatar>
-                    <img src="https://randomuser.me/api/portraits/men/81.jpg">
-                </v-list-item-avatar>
-
+                class="py-0 mt-2">
+            <v-list-item link v-on:click="goToDashboard">
+                <v-list-item-icon>
+                    <v-icon>fas fa-pager</v-icon>
+                </v-list-item-icon>
                 <v-list-item-content>
-                    <v-list-item-title>Application</v-list-item-title>
-                    <v-list-item-subtitle>Subtext</v-list-item-subtitle>
+                    <v-list-item-title>Dashboard</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-
-            <v-divider></v-divider>
-
-            <v-list-item
-                    v-for="item in items"
-                    :key="item.title"
-                    link
-            >
+            <v-list-item link v-on:click="goToProjects">
                 <v-list-item-icon>
-                    <v-icon>{{ item.icon }}</v-icon>
+                    <v-icon dense>fas fa-tools</v-icon>
                 </v-list-item-icon>
-
                 <v-list-item-content>
-                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                    <v-list-item-title>Projects</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
         </v-list>
@@ -49,11 +40,17 @@
 
     @Component
     export default class BismuthLeftToolbar extends Vue {
-        items: any = [
-            {title: 'Dashboard', icon: 'mdi-view-dashboard'},
-            {title: 'Photos', icon: 'mdi-image'},
-            {title: 'About', icon: 'mdi-help-box'},
-        ]
+
+        public goToDashboard() {
+            if (this.$route.path == "/dashboard") return;
+            this.$router.replace('/dashboard')
+        }
+
+        public goToProjects() {
+            if (this.$route.path == "/dashboard/projects") return;
+            this.$router.replace('/dashboard/projects')
+        }
+
     }
 </script>
 

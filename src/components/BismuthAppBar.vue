@@ -13,9 +13,7 @@
 
         <v-menu
                 :close-on-content-click="false"
-                :nudge-width="200"
-                offset-y
-        >
+                offset-y>
             <template v-slot:activator="{ on, attrs }">
                 <v-btn
                         class="mx-2"
@@ -25,7 +23,7 @@
                         small
                         v-bind="attrs"
                         v-on="on">
-                    Select a project
+                    {{ projectDropdownTitle }}
                     <v-icon x-small right>fa-chevron-down</v-icon>
                 </v-btn>
             </template>
@@ -35,13 +33,27 @@
                     <v-autocomplete
                             dense
                             outlined
-                            cache-items
                             class="mx-1"
+                            hide-no-data
+                            hide-selected
+                            return-object
+                            clearable
+                            v-model="selectedProject"
                             :loading="isLoading"
-                            :items="searchedProjects"
                             label="Search projects"
+                            :items="searchedProjects"
                             :search-input.sync="projectSearchWord"
-                    ></v-autocomplete>
+                    >
+                    </v-autocomplete>
+                    <v-alert
+                            dense
+                            class="text-caption"
+                            v-if="showProjectSearchAlert"
+                            outlined
+                            :color="projectSearchAlertColor"
+                    >
+                        {{ projectSearchAlertMessage }}
+                    </v-alert>
                 </v-card-text>
             </v-card>
         </v-menu>
@@ -84,18 +96,51 @@
         searchedProjects: Array<AutocompleteObjectHolder<ProjectPOTO>>;
         hasError: boolean = false;
         errorMessage: string = '';
-
+        selectedProject: AutocompleteObjectHolder<ProjectPOTO> | null = null;
+        projectSearchAlertMessage: string = "Start typing to search your projects";
+        projectSearchAlertColor: string = "accent";
+        showProjectSearchAlert: boolean = true;
+        projectDropdownTitle: string = "Select a project";
+        sheet = true;
         constructor() {
             super();
             this.searchedProjects = new Array<AutocompleteObjectHolder<ProjectPOTO>>();
         }
 
+        @Watch('selectedProject')
+        onSelectedProjectChange(
+            newProject: AutocompleteObjectHolder<ProjectPOTO> | undefined,
+            oldProject: AutocompleteObjectHolder<ProjectPOTO> | undefined
+        ) {
+            if (undefined == newProject) {
+                this.projectDropdownTitle = "Select a project";
+                this.$router.push("/dashboard");
+                return
+            }
+            const selectedProject = newProject.value;
+            this.projectDropdownTitle = selectedProject.name;
+            this.$router.push("/project/" + selectedProject.project_id);
+        }
+
         @Watch('projectSearchWord')
         onProjectSearchWordChange(val: string, oldVal: string) {
+            if (val == '' || val == null) {
+                this.showProjectSearchAlert = true;
+                this.projectSearchAlertColor = "accent";
+                this.projectSearchAlertMessage = "Start typing to search your projects";
+                return;
+            }
             this.isLoading = true;
             this.hasError = false;
             new ProjectAPI().searchProjectsByString(val).then(result => {
                 this.searchedProjects = ProjectCommons.getProjectsForAutocomplete(result.data);
+                if (this.searchedProjects.length == 0) {
+                    this.showProjectSearchAlert = true;
+                    this.projectSearchAlertColor = "error";
+                    this.projectSearchAlertMessage = "You have no projects with this name...";
+                } else {
+                    this.showProjectSearchAlert = false;
+                }
             }).catch((error: AxiosError) => {
                 let message: string;
                 try {

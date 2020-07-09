@@ -8,8 +8,7 @@ export default class ProjectCommons {
         projects.map((value) => {
             let autocompleteObjectHolder = new AutocompleteObjectHolder<ProjectPOTO>();
             autocompleteObjectHolder.value = value;
-            autocompleteObjectHolder.disabled = value.active;
-            autocompleteObjectHolder.header = value.name;
+            autocompleteObjectHolder.disabled = !value.active;
             autocompleteObjectHolder.text = value.name;
             autocompleteHolders.push(autocompleteObjectHolder);
         })
