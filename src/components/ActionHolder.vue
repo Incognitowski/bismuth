@@ -1,13 +1,23 @@
 <template>
-    <div></div>
+    <div>
+        <ProjectCreator v-if="isCreatingNewProject"/>
+    </div>
 </template>
 
 <script lang="ts">
     import {Vue, Component, Watch} from 'vue-property-decorator';
-    import {Intent, IntentResult} from '@/store/modules/Intents';
+    import {Intent} from '@/store/modules/Intents';
+    import ProjectPOTO from "@/domains/project/ProjectPOTO";
+    import ProjectCreator from "@/components/ProjectCreator.vue";
 
-    @Component
+    @Component({
+        components: {
+            ProjectCreator
+        }
+    })
     export default class ActionHolder extends Vue {
+
+        isCreatingNewProject: boolean = false;
 
         get newProjectIntent() {
             return this.$store.state.appIntents.newProjectIntent;
@@ -15,14 +25,14 @@
 
         @Watch('newProjectIntent')
         onNewProjectIntentChange(
-            newIntent: Intent<null> | null,
-            oldIntent: Intent<null> | null,
+            newIntent: Intent<ProjectPOTO> | null,
+            oldIntent: Intent<ProjectPOTO> | null,
         ) {
-            if (newIntent == null) return;
-            console.log("updated newproject intent", newIntent, oldIntent)
-            setTimeout(() => {
-                this.$store.dispatch("appIntents/resolveNewProjectIntent", IntentResult.INTENT_SUCCESS)
-            }, 2000)
+            if (newIntent == null) {
+                this.isCreatingNewProject = false;
+                return;
+            }
+            this.isCreatingNewProject = true;
         }
 
     }

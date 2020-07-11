@@ -49,22 +49,6 @@
                 this.redirectToLoginIfNotAlready();
                 this.$store.dispatch('appState/setGlobalLoadingState', false)
             }
-
-            setTimeout(() => {
-                this.$store.dispatch(
-                    "appIntents/setNewProjectIntent",
-                    new class implements Intent<null> {
-                        action: IntentAction = IntentAction.NEW_PROJECT;
-                        callback: IntentCallbackInterface = new class implements IntentCallbackInterface {
-                            action(result: IntentResult): void {
-                                console.log("resolvido")
-                            }
-                        };
-                        payload: null = null;
-                    }
-                );
-            }, 2000);
-
         }
 
         get isGloballyLoading(): boolean {

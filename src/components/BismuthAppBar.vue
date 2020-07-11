@@ -30,21 +30,26 @@
 
             <v-card class="mt-1">
                 <v-card-text>
-                    <v-autocomplete
-                            dense
-                            outlined
-                            class="mx-1"
-                            hide-no-data
-                            hide-selected
-                            return-object
-                            clearable
-                            v-model="selectedProject"
-                            :loading="isLoading"
-                            label="Search projects"
-                            :items="searchedProjects"
-                            :search-input.sync="projectSearchWord"
-                    >
-                    </v-autocomplete>
+                    <v-row class="align-baseline">
+                        <v-autocomplete
+                                dense
+                                outlined
+                                class="mx-1"
+                                hide-no-data
+                                hide-selected
+                                return-object
+                                clearable
+                                v-model="selectedProject"
+                                :loading="isLoading"
+                                label="Search projects"
+                                :items="searchedProjects"
+                                :search-input.sync="projectSearchWord"
+                        >
+                        </v-autocomplete>
+                        <v-btn v-on:click="createNewProject" depressed rounded icon>
+                            <v-icon small>fas fa-plus</v-icon>
+                        </v-btn>
+                    </v-row>
                     <v-alert
                             dense
                             class="text-caption"
@@ -88,6 +93,7 @@
     import {AxiosError} from "axios";
     import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
     import ProjectCommons from "@/domains/project/ProjectCommons";
+    import {Intent, IntentAction, IntentCallbackInterface, IntentResult} from "@/store/modules/Intents";
 
     @Component
     export default class BismuthAppBar extends Vue {
@@ -102,6 +108,7 @@
         showProjectSearchAlert: boolean = true;
         projectDropdownTitle: string = "Select a project";
         sheet = true;
+
         constructor() {
             super();
             this.searchedProjects = new Array<AutocompleteObjectHolder<ProjectPOTO>>();
@@ -154,6 +161,23 @@
             }).finally(() => {
                 this.isLoading = false;
             })
+        }
+
+        createNewProject() {
+            const newProject = new ProjectPOTO();
+            newProject.name = this.projectSearchWord || "";
+            const intent: Intent<ProjectPOTO> = {
+                action: IntentAction.NEW_PROJECT,
+                payload: newProject,
+                callback: {
+                    action(result: IntentResult) {
+                    }
+                }
+            };
+            this.$store.dispatch(
+                "appIntents/setNewProjectIntent",
+                intent
+            );
         }
 
     }

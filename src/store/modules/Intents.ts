@@ -1,5 +1,6 @@
 import {Module} from "vuex";
 import {RootState} from "@/store";
+import ProjectPOTO from "@/domains/project/ProjectPOTO";
 
 export enum IntentAction {
     NEW_PROJECT
@@ -22,7 +23,7 @@ export interface Intent<T> {
 }
 
 export interface IntentsState {
-    newProjectIntent: Intent<null> | null,
+    newProjectIntent: Intent<ProjectPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -31,7 +32,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         newProjectIntent: null,
     },
     mutations: {
-        setNewProjectIntent(state, intent: Intent<null>) {
+        setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
             state.newProjectIntent = intent;
         },
         resolveNewProjectIntent(state, result: IntentResult) {
@@ -49,7 +50,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         setGlobalLoadingState(context, shouldLoad: boolean) {
             context.commit('setGlobalLoadingState', shouldLoad);
         },
-        setNewProjectIntent(context, intent: Intent<null>) {
+        setNewProjectIntent(context, intent: Intent<ProjectPOTO>) {
             context.commit("setNewProjectIntent", intent)
         },
         resolveNewProjectIntent(context, result: IntentResult) {

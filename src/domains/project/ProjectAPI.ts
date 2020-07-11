@@ -1,4 +1,5 @@
 import ProjectREST from "@/domains/project/ProjectREST";
+import ProjectPOTO from "@/domains/project/ProjectPOTO";
 
 export default class ProjectAPI {
 
@@ -10,6 +11,10 @@ export default class ProjectAPI {
 
     public async searchProjectsByString(searchString: string){
         return await this.projectREST.queryProjects(searchString);
+    }
+
+    public async createProject(newProject : ProjectPOTO){
+        return await this.projectREST.createProject(newProject);
     }
 
 }
