@@ -1,40 +1,42 @@
 <template>
-    <v-card
-            dark
-            outlined
-            :loading="cardLoader"
-            class="mx-auto d-flex flex-row"
-    >
-        <div class="py-16 px-8">
-            <img alt="Bismuth Logo" height="200" width="200" class="m-16" :src="require('../../assets/logo.svg')">
-        </div>
-        <div class="py-16 px-8 d-flex flex-column" style="width: 350px">
-            <v-text-field
-                    dense
-                    outlined
-                    label="Username"
-                    v-model="username"
-                    :disabled="isLoading"
-            ></v-text-field>
-            <v-text-field
-                    dense
-                    outlined
-                    type="password"
-                    label="Password"
-                    v-model="password"
-                    :disabled="isLoading"
-            ></v-text-field>
-            <p v-if="hasErrors" class="text-wrap red--text mx-0">{{ errorText }}</p>
-            <v-btn color="accent"
-                   width="100%"
-                   :disabled="isLoading"
-                   v-on:click="attemptLogin"
-            >
-                LOGIN
-            </v-btn>
-            <router-link to="/register" class="white--text mt-6 mx-auto">or create an account</router-link>
-        </div>
-    </v-card>
+    <v-container class="fill-height">
+        <v-card
+                dark
+                outlined
+                :loading="cardLoader"
+                class="mx-auto mt-16 d-flex flex-row"
+        >
+            <div class="py-16 px-8">
+                <img alt="Bismuth Logo" height="200" width="200" class="m-16" :src="require('../../assets/logo.svg')">
+            </div>
+            <div class="py-16 px-8 d-flex flex-column" style="width: 350px">
+                <v-text-field
+                        dense
+                        outlined
+                        label="Username"
+                        v-model="username"
+                        :disabled="isLoading"
+                ></v-text-field>
+                <v-text-field
+                        dense
+                        outlined
+                        type="password"
+                        label="Password"
+                        v-model="password"
+                        :disabled="isLoading"
+                ></v-text-field>
+                <p v-if="hasErrors" class="text-wrap red--text mx-0">{{ errorText }}</p>
+                <v-btn color="accent"
+                       width="100%"
+                       :disabled="isLoading"
+                       v-on:click="attemptLogin"
+                >
+                    LOGIN
+                </v-btn>
+                <router-link to="/register" class="white--text mt-6 mx-auto">or create an account</router-link>
+            </div>
+        </v-card>
+    </v-container>
 </template>
 
 <script lang="ts">

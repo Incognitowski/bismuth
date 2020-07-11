@@ -1,6 +1,7 @@
 import {AxiosResponse} from "axios";
 import HttpProvider from "@/providers/HttpProvider";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
+import Page from "@/domains/framework/data/Page";
 
 export default class ProjectREST {
     private httpProvider: HttpProvider;
@@ -17,4 +18,12 @@ export default class ProjectREST {
         return this.httpProvider.authInstance.post("/project", newProject);
     }
 
+    async getAllProjects(page: number, size: number): Promise<AxiosResponse<Page<ProjectPOTO>>> {
+        return this.httpProvider.authInstance.get("/project", {
+            params: {
+                page,
+                size
+            }
+        })
+    }
 }

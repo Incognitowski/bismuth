@@ -5,7 +5,7 @@
         <BismuthAppBar/>
         <ActionHolder/>
         <v-main>
-            <v-container class="fill-height">
+            <v-container fluid>
                 <AppLoader v-if="isGloballyLoading"></AppLoader>
                 <router-view v-if="!isGloballyLoading"/>
             </v-container>
@@ -23,6 +23,7 @@
     import AuthenticationAPI from "@/domains/authentication/AuthenticationAPI";
 
     import {Intent, IntentAction, IntentCallbackInterface, IntentResult} from '@/store/modules/Intents';
+    import {AxiosError, AxiosResponse} from "axios";
 
     @Component({
         components: {
@@ -35,15 +36,12 @@
     })
     export default class App extends Vue {
 
-        private authenticationAPI: AuthenticationAPI;
-
         constructor() {
             super();
-            this.authenticationAPI = new AuthenticationAPI();
         }
 
         mounted() {
-            if (this.authenticationAPI.isLoggedIn()) {
+            if (new AuthenticationAPI().isLoggedIn()) {
                 this.checkIfTokenIsValid();
             } else {
                 this.redirectToLoginIfNotAlready();
@@ -55,14 +53,16 @@
             return this.$store.state.appState.isGloballyLoading
         }
 
-        private async checkIfTokenIsValid() {
-            try {
-                await this.authenticationAPI.validateJWT();
-                this.redirectToDashboardIfNotAlready();
-            } catch (e) {
+        private checkIfTokenIsValid() {
+            new AuthenticationAPI().validateJWT().then((result: AxiosResponse) => {
+                this.$store.dispatch("appState/setLeftToolbarVisibility", true);
+                this.$store.dispatch("appState/setRightToolbarVisibility", true);
+                this.$store.dispatch("appState/setTopToolbarVisibility", true);
+            }).catch((error: AxiosError) => {
                 this.redirectToLoginIfNotAlready();
-            }
-            await this.$store.dispatch('appState/setGlobalLoadingState', false)
+            }).finally(() => {
+                this.$store.dispatch('appState/setGlobalLoadingState', false)
+            })
         }
 
         private redirectToLoginIfNotAlready() {

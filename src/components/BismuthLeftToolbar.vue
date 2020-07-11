@@ -2,12 +2,12 @@
     <v-navigation-drawer
             app
             dark
+            :color="getColor"
             clipped
             absolute
             permanent
             mini-variant
             expand-on-hover
-            color="transparent"
             v-if="this.$store.state.appState.isShowingLeftToolbar"
     >
         <v-list
@@ -49,6 +49,12 @@
         public goToProjects() {
             if (this.$route.path == "/dashboard/projects") return;
             this.$router.replace('/dashboard/projects')
+        }
+
+        get getColor(): string {
+            if(this.$vuetify.theme.dark)
+                return "grey darken-4";
+            return "white"
         }
 
     }
