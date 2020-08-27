@@ -93,7 +93,7 @@
     import {AxiosError} from "axios";
     import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
     import ProjectCommons from "@/domains/project/ProjectCommons";
-    import {Intent, IntentAction, IntentCallbackInterface, IntentResult} from "@/store/modules/Intents";
+    import {Intent, IntentAction, IntentResult} from "@/store/modules/Intents";
 
     @Component
     export default class BismuthAppBar extends Vue {
@@ -126,7 +126,7 @@
             }
             const selectedProject = newProject.value;
             this.projectDropdownTitle = selectedProject.name;
-            this.$router.push("/project/" + selectedProject.project_id);
+            this.$router.push("/project/" + selectedProject.projectId);
         }
 
         @Watch('projectSearchWord')

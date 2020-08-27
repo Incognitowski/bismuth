@@ -109,7 +109,7 @@
                 this.successMessage = `Nice! You just created the ${this.newProject.name} project! I shall lead you to the project page now 🎇`;
                 this.isDoneCreating = true;
                 setTimeout(() => {
-                    this.$router.replace('/project/' + result.data.project_id);
+                    this.$router.replace('/project/' + result.data.projectId);
                     this.finishProjectCreation();
                 }, 3000);
             }).catch((error: AxiosError) => {

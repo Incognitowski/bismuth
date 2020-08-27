@@ -1,5 +1,7 @@
+import UserPOTO from "@/domains/user/UserPOTO";
+
 export default class ProjectPOTO {
-    public project_id!: string;
+    public projectId!: string;
     public name!: string;
     public active!: boolean;
     public isPubliclyVisible!: boolean;
@@ -7,6 +9,6 @@ export default class ProjectPOTO {
     public updatedAt!: number;
     public softdeletedAt!: number;
     public isSoftdeleted!: boolean;
-    public createdBy!: string;
-    public ownedBy!: string;
+    public createdBy!: UserPOTO;
+    public ownedBy!: UserPOTO;
 }
