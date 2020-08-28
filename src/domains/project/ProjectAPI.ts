@@ -17,6 +17,10 @@ export default class ProjectAPI {
         return await this.projectREST.createProject(newProject);
     }
 
+    public async editProject(project: ProjectPOTO) {
+        return await this.projectREST.editProject(project);
+    }
+
     public async getAllProjects(page: number, size: number) {
         return await this.projectREST.getAllProjects(page, size);
     }

@@ -18,6 +18,10 @@ export default class ProjectREST {
         return this.httpProvider.authInstance.post("/project", newProject);
     }
 
+    public editProject(project: ProjectPOTO): Promise<AxiosResponse<ProjectPOTO>> {
+        return this.httpProvider.authInstance.put("/project/" + project.projectId, project);
+    }
+
     async getAllProjects(page: number, size: number): Promise<AxiosResponse<Page<ProjectPOTO>>> {
         return this.httpProvider.authInstance.get("/project", {
             params: {

@@ -3,7 +3,8 @@ import {RootState} from "@/store";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 
 export enum IntentAction {
-    NEW_PROJECT
+    NEW_PROJECT,
+    EDIT_PROJECT
 }
 
 export enum IntentResult {
@@ -24,12 +25,14 @@ export interface Intent<T> {
 
 export interface IntentsState {
     newProjectIntent: Intent<ProjectPOTO> | null,
+    editProjectIntent: Intent<ProjectPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
     namespaced: true,
     state: {
         newProjectIntent: null,
+        editProjectIntent: null,
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -44,6 +47,19 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewProjectIntent(state) {
             state.newProjectIntent = null;
+        },
+        setEditProjectIntent(state, intent: Intent<ProjectPOTO>) {
+            state.editProjectIntent = intent;
+        },
+        resolveEditProjectIntent(state, result: IntentResult) {
+            if (state.editProjectIntent) {
+                state.editProjectIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newProjectIntent with empty intent")
+            }
+        },
+        clearEditProjectIntent(state) {
+            state.editProjectIntent = null;
         }
     },
     actions: {
@@ -59,6 +75,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewProjectIntent(context) {
             context.commit("clearNewProjectIntent")
+        },
+        setEditProjectIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setEditProjectIntent", intent)
+        },
+        resolveEditProjectIntent(context, result: IntentResult) {
+            context.commit("resolveEditProjectIntent", result);
+            context.commit("clearEditProjectIntent");
+        },
+        clearEditProjectIntent(context) {
+            context.commit("clearEditProjectIntent")
         }
     },
 }

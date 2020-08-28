@@ -33,6 +33,7 @@
             <th class="text-left">Creation</th>
             <th class="text-left">Created by</th>
             <th class="text-left">Status</th>
+            <th class="text-left"></th>
           </tr>
           </thead>
           <tbody>
@@ -42,6 +43,21 @@
             <td>{{ project.createdBy.username }}</td>
             <td v-if="project.active" class="green--text">Active</td>
             <td v-if="!project.active" class="red--text">Inactive</td>
+            <td>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                      @click="editProject(project)"
+                      icon
+                      rounded
+                      v-on="on"
+                      v-bind="attrs">
+                    <v-icon>fas fa-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Properties</span>
+              </v-tooltip>
+            </td>
           </tr>
           </tbody>
         </template>
@@ -128,6 +144,23 @@ export default class Projects extends Vue {
     };
     this.$store.dispatch(
         "appIntents/setNewProjectIntent",
+        intent
+    );
+  }
+
+  editProject(project: ProjectPOTO) {
+    const intent: Intent<ProjectPOTO> = {
+      action: IntentAction.EDIT_PROJECT,
+      payload: project,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result != IntentResult.INTENT_CANCELLED)
+            this.searchForProjects();
+        }
+      }
+    };
+    this.$store.dispatch(
+        "appIntents/setEditProjectIntent",
         intent
     );
   }
