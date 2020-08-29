@@ -1,4 +1,5 @@
 import UserPOTO from "@/domains/user/UserPOTO";
+import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
 
 export default class ProjectPOTO {
     public projectId!: string;
@@ -11,4 +12,5 @@ export default class ProjectPOTO {
     public isSoftdeleted!: boolean;
     public createdBy!: UserPOTO;
     public ownedBy!: UserPOTO;
+    public relationShipWithCurrentUser?: ProjectVisibilityPOTO;
 }

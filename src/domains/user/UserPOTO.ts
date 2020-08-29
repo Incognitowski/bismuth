@@ -1,3 +1,5 @@
+import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
+
 export default class UserPOTO {
     public userId?: string;
     public username?: string;
@@ -8,4 +10,5 @@ export default class UserPOTO {
     public updatedAt?: number;
     public softdeletedAt?: number;
     public isSoftdeleted?: boolean;
+    public relationshipWithCurrentProject?: ProjectVisibilityPOTO;
 }

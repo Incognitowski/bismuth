@@ -15,4 +15,10 @@ export default class UserREST {
         return this.httpProvider.guestInstance.post("/user", newUser);
     }
 
+    public async searchByUsername(
+        username: string
+    ): Promise<AxiosResponse<Array<UserPOTO>>> {
+        return this.httpProvider.authInstance.get("/user/by-username/" + username);
+    }
+
 }

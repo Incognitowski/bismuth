@@ -1,5 +1,6 @@
 import ProjectREST from "@/domains/project/ProjectREST";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
+import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
 
 export default class ProjectAPI {
 
@@ -23,6 +24,14 @@ export default class ProjectAPI {
 
     public async getAllProjects(page: number, size: number) {
         return await this.projectREST.getAllProjects(page, size);
+    }
+
+    public async getUsersRelatedToProject(project: ProjectPOTO) {
+        return await this.projectREST.getUsersRelatedToProject(project.projectId);
+    }
+
+    public async attachUserToProject(visibility: ProjectVisibilityPOTO){
+        return await this.projectREST.attachUserToProject(visibility);
     }
 
 }

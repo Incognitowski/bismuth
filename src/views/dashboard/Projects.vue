@@ -2,7 +2,7 @@
   <v-card outlined :loading="isLoading">
     <v-card-title>
       <h3>Projects</h3>
-      <span class="caption ml-2 mt-2" v-if="projects != null">Showing {{ size }} projects of {{
+      <span class="caption ml-2 mt-2" v-if="projects != null">Showing {{ size > projects.totalElements ? projects.totalElements : size }} projects of {{
           projects.totalElements
         }}</span>
       <v-spacer></v-spacer>
@@ -48,6 +48,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                       @click="editProject(project)"
+                      :disabled="!canEditProjectProperties(project)"
                       icon
                       rounded
                       v-on="on"
@@ -97,6 +98,8 @@ import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import {Intent, IntentAction, IntentResult} from "@/store/modules/Intents";
 import Page from "@/domains/framework/data/Page";
 import moment from "moment";
+import {ProjectVisibilityEnum} from "@/domains/project/projectVisibility/ProjectVisibilityEnum";
+import ProjectVisibilityCommons from "@/domains/project/projectVisibility/ProjectVisibilityCommons";
 
 @Component
 export default class Projects extends Vue {
@@ -123,6 +126,10 @@ export default class Projects extends Vue {
     }).finally(() => {
       this.isLoading = false;
     })
+  }
+
+  canEditProjectProperties(project: ProjectPOTO) {
+    return ProjectVisibilityCommons.getVisibilityFromProject(project);
   }
 
   parseDate(date: number): string {

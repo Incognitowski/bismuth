@@ -17,4 +17,8 @@ export default class UserAPI {
         return await this.userREST.createAccount(newUser);
     }
 
+    public async searchByUsername(username: string) {
+        return await this.userREST.searchByUsername(username);
+    }
+
 }

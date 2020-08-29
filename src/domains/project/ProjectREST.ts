@@ -2,6 +2,8 @@ import {AxiosResponse} from "axios";
 import HttpProvider from "@/providers/HttpProvider";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import Page from "@/domains/framework/data/Page";
+import UserPOTO from "@/domains/user/UserPOTO";
+import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
 
 export default class ProjectREST {
     private httpProvider: HttpProvider;
@@ -30,4 +32,14 @@ export default class ProjectREST {
             }
         })
     }
+
+    async getUsersRelatedToProject(projectId: string): Promise<AxiosResponse<Array<UserPOTO>>> {
+        return this.httpProvider.authInstance.get("/project/" + projectId + "/users");
+    }
+
+    async attachUserToProject(visibility: ProjectVisibilityPOTO): Promise<AxiosResponse<ProjectVisibilityPOTO>> {
+        return this.httpProvider.authInstance.post("/project/" + visibility.project_id + "/users", visibility);
+    }
 }
+
+
