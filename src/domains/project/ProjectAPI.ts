@@ -34,4 +34,12 @@ export default class ProjectAPI {
         return await this.projectREST.attachUserToProject(visibility);
     }
 
+    public async getVisibilityWithProject(project: ProjectPOTO){
+        return await this.projectREST.getVisibilityWithProject(project.projectId);
+    }
+
+    public async detachUserFromProject(projectVisibility: ProjectVisibilityPOTO){
+        return await this.projectREST.detachUserFromProject(projectVisibility);
+    }
+
 }

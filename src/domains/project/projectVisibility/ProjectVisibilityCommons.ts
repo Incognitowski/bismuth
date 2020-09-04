@@ -1,8 +1,13 @@
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import {ProjectVisibilityEnum} from "@/domains/project/projectVisibility/ProjectVisibilityEnum";
 import ProjectVisibilityConstants from "@/domains/project/projectVisibility/ProjectVisibilityConstants";
+import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
 
 export default class ProjectVisibilityCommons {
+
+    public static getVisibilityFromPOTO(projectVisibility: ProjectVisibilityPOTO): ProjectVisibilityEnum {
+        return this.getVisibilityFrom(<string>projectVisibility?.visibility);
+    }
 
     public static getVisibilityFromProject(project: ProjectPOTO): ProjectVisibilityEnum {
         return this.getVisibilityFrom(<string>project?.relationShipWithCurrentUser?.visibility);

@@ -40,6 +40,16 @@ export default class ProjectREST {
     async attachUserToProject(visibility: ProjectVisibilityPOTO): Promise<AxiosResponse<ProjectVisibilityPOTO>> {
         return this.httpProvider.authInstance.post("/project/" + visibility.project_id + "/users", visibility);
     }
+
+    async getVisibilityWithProject(projectId: string): Promise<AxiosResponse<ProjectVisibilityPOTO>> {
+        return this.httpProvider.authInstance.get("/project/" + projectId + "/visibility");
+    }
+
+    async detachUserFromProject(projectVisibility: ProjectVisibilityPOTO): Promise<AxiosResponse<ProjectVisibilityPOTO>> {
+        return this.httpProvider.authInstance.delete("/project/" + projectVisibility.project_id + "/visibility/" + projectVisibility.project_visibility_id);
+    }
+
+
 }
 
 

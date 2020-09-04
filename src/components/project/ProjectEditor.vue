@@ -140,7 +140,22 @@
                   <td>{{ parseCreationDateFromRelationship(user) }}</td>
                   <td>{{ parseUpdateDateFromRelationship(user) }}</td>
                   <td>{{ parseVisibilityOfProjectOf(user) }}</td>
-                  <td></td>
+                  <td>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                            @click="promptUserDetachment(user)"
+                            :disabled="!canEditUserAttachment(user)"
+                            icon
+                            rounded
+                            v-on="on"
+                            v-bind="attrs">
+                          <v-icon>fas fa-user-times</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Properties</span>
+                    </v-tooltip>
+                  </td>
                   <td></td>
                 </tr>
                 </tbody>
@@ -160,8 +175,35 @@
         </v-tabs-items>
       </v-container>
     </v-sheet>
-
-    <!-- SNACKBACK -->
+    <v-dialog
+        v-model="detachUserDialog"
+        max-width="500px"
+    >
+      <v-card :loading="isDetachingUserFromProject">
+        <v-card-title>
+          <span>Detach "{{ userToDetach ? userToDetach.username : "" }}" from the "{{ projectToEdit ? projectToEdit.name : "" }}" project</span>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer/>
+          <v-btn
+              color="green"
+              text
+              :disabled="isDetachingUserFromProject"
+              @click="confirmUserDetachment()"
+          >
+            confirm
+          </v-btn>
+          <v-btn
+              color="red"
+              text
+              :disabled="isDetachingUserFromProject"
+              @click="detachUserDialog = false"
+          >
+            cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-snackbar
         v-model="showSnackBar"
         timeout="5000"
@@ -186,11 +228,14 @@ import AutocompleteObjectHolder from "@/domains/framework/autocomplete/Autocompl
 import UserAPI from "@/domains/user/UserAPI";
 import UserCommons from "@/domains/user/UserCommons";
 import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
+import ProjectVisibilityConstants from "@/domains/project/projectVisibility/ProjectVisibilityConstants";
 
 @Component
 export default class ProjectEditor extends Vue {
 
   changedProjectsProperties = false;
+
+  detachUserDialog = false;
 
   currentTab = null;
   isSheetOpen = true;
@@ -206,6 +251,9 @@ export default class ProjectEditor extends Vue {
 
   projectToEdit: ProjectPOTO;
 
+  isDetachingUserFromProject = false;
+  userToDetach: UserPOTO | null = null;
+
   usersRelatedToProject?: Array<UserPOTO> | null = null;
 
   selectedUser: AutocompleteObjectHolder<UserPOTO> | null = null;
@@ -213,6 +261,8 @@ export default class ProjectEditor extends Vue {
   isLoadingUserAutocomplete = false;
   searchedUsers: Array<AutocompleteObjectHolder<UserPOTO>> = new Array<AutocompleteObjectHolder<UserPOTO>>();
   userSearchWord = "";
+
+  visibilityWithCurrentProject: ProjectVisibilityPOTO | null = null;
 
   constructor() {
     super();
@@ -224,6 +274,28 @@ export default class ProjectEditor extends Vue {
   mounted() {
     const editProjectIntent: Intent<ProjectPOTO> = this.$store.state.appIntents.editProjectIntent;
     Object.assign(this.projectToEdit, editProjectIntent.payload)
+    this.searchForVisibilityWithCurrentProject();
+  }
+
+  searchForVisibilityWithCurrentProject() {
+    this.isLoading = true;
+    new ProjectAPI().getVisibilityWithProject(this.projectToEdit).then((response: AxiosResponse<ProjectVisibilityPOTO>) => {
+      this.visibilityWithCurrentProject = response.data;
+    }).catch((error: AxiosError) => {
+      let message: string;
+      try {
+        const exception = DefaultHTTPException.fromAxiosError(error);
+        message = exception.message;
+      } catch (e) {
+        message = e;
+      }
+      this.hasError = true;
+      this.isLoading = false;
+      this.snackBarText = message;
+      this.showSnackBar = true;
+    }).finally(() => {
+      this.isLoading = false;
+    });
   }
 
   cancelProjectEditing() {
@@ -258,6 +330,13 @@ export default class ProjectEditor extends Vue {
       this.snackBarText = message;
       this.showSnackBar = true;
     });
+  }
+
+  canEditUserAttachment(user: UserPOTO) {
+    if (user.relationshipWithCurrentProject?.visibility == ProjectVisibilityConstants.OWNER) return false;
+    if (this.visibilityWithCurrentProject?.visibility == ProjectVisibilityConstants.OWNER) return true;
+    return this.visibilityWithCurrentProject?.visibility == ProjectVisibilityConstants.MANAGER &&
+        ![ProjectVisibilityConstants.MANAGER, ProjectVisibilityConstants.OWNER].includes(<string>user.relationshipWithCurrentProject?.visibility);
   }
 
   loadUsersRelatedToProject() {
@@ -319,13 +398,12 @@ export default class ProjectEditor extends Vue {
   addUserToProject() {
     this.isLoading = true;
     this.hasError = false;
-    this.showSnackBar = true;
+    this.showSnackBar = false;
     const visibility: ProjectVisibilityPOTO = {
       project_id: this.projectToEdit.projectId,
       user_id: this.selectedUser?.value.userId,
-      visibility: this.selectedRole
+      visibility: <string>this.selectedRole
     }
-    console.log(visibility);
     new ProjectAPI().attachUserToProject(visibility).then(() => {
       this.snackBarText = "Great! Now " + this.selectedUser?.value.username + " is a part of the " + this.projectToEdit.name + " project. 😎";
       this.showSnackBar = true;
@@ -334,7 +412,7 @@ export default class ProjectEditor extends Vue {
       this.userSearchWord = "";
       this.selectedRole = null;
       this.selectedUser = null;
-      this.searchedUsers = null;
+      this.searchedUsers = new Array<AutocompleteObjectHolder<UserPOTO>>();
       this.loadUsersRelatedToProject();
     }).catch((error: AxiosError) => {
       let message: string;
@@ -348,6 +426,37 @@ export default class ProjectEditor extends Vue {
       this.isLoading = false;
       this.snackBarText = message;
       this.showSnackBar = true;
+    })
+  }
+
+  promptUserDetachment(user: UserPOTO) {
+    this.userToDetach = user;
+    this.detachUserDialog = true;
+    console.log(user);
+  }
+
+  confirmUserDetachment() {
+    this.isDetachingUserFromProject = true;
+    new ProjectAPI().detachUserFromProject(this.userToDetach?.relationshipWithCurrentProject!!).then((result: AxiosResponse<ProjectVisibilityPOTO>) => {
+      this.detachUserDialog = false;
+      this.hasError = false;
+      this.snackBarText = "Successfully detached user from project. Bye bye " + this.userToDetach?.username + "! 😘";
+      this.showSnackBar = true;
+      this.loadUsersRelatedToProject();
+    }).catch((error: AxiosError) => {
+      let message: string;
+      try {
+        const exception = DefaultHTTPException.fromAxiosError(error);
+        message = exception.message;
+      } catch (e) {
+        message = e;
+      }
+      this.hasError = true;
+      this.isLoading = false;
+      this.snackBarText = message;
+      this.showSnackBar = true;
+    }).finally(() => {
+      this.isDetachingUserFromProject = false;
     })
   }
 
