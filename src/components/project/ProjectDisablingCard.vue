@@ -70,7 +70,7 @@ export default class ProjectDisablingCard extends Vue {
   confirmDisable() {
     this.isLoading = true;
     this.hasError = false;
-    new ProjectAPI().disableProject(this.projectToDisable).then((result : AxiosResponse) => {
+    new ProjectAPI().disableProject(<ProjectPOTO>this.projectToDisable).then((result : AxiosResponse) => {
       this.isDialogOpen = false;
       setTimeout(() => {
         this.$store.dispatch("appIntents/resolveProjectDisableIntent", IntentResult.INTENT_SUCCESS);

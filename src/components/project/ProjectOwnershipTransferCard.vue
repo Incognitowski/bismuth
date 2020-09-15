@@ -117,7 +117,7 @@ export default class ProjectOwnershipTransferCard extends Vue {
     this.isLoading = true;
     this.hasError = false;
     let projectTransferPOTO = new ProjectTransferPOTO(this.userEmail, this.projectName);
-    new ProjectAPI().transferProject(projectTransferPOTO, this.projectToTransfer).then((result : AxiosResponse) => {
+    new ProjectAPI().transferProject(projectTransferPOTO, <ProjectPOTO>this.projectToTransfer).then((result : AxiosResponse) => {
       this.isDialogOpen = false;
       setTimeout(() => {
         this.$store.dispatch("appIntents/resolveProjectTransferIntent", IntentResult.INTENT_SUCCESS);
