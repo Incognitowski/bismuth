@@ -4,7 +4,9 @@ import ProjectPOTO from "@/domains/project/ProjectPOTO";
 
 export enum IntentAction {
     NEW_PROJECT,
-    EDIT_PROJECT
+    EDIT_PROJECT,
+    TRANSFER_PROJECT,
+    DISABLE_PROJECT,
 }
 
 export enum IntentResult {
@@ -26,6 +28,8 @@ export interface Intent<T> {
 export interface IntentsState {
     newProjectIntent: Intent<ProjectPOTO> | null,
     editProjectIntent: Intent<ProjectPOTO> | null,
+    projectTransferIntent: Intent<ProjectPOTO> | null,
+    projectDisableIntent: Intent<ProjectPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -33,6 +37,8 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
     state: {
         newProjectIntent: null,
         editProjectIntent: null,
+        projectTransferIntent: null,
+        projectDisableIntent: null,
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -60,6 +66,32 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearEditProjectIntent(state) {
             state.editProjectIntent = null;
+        },
+        setTransferProjectIntent(state, intent: Intent<ProjectPOTO>) {
+            state.projectTransferIntent = intent;
+        },
+        resolveTransferProjectIntent(state, result: IntentResult) {
+            if (state.projectTransferIntent) {
+                state.projectTransferIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newProjectIntent with empty intent")
+            }
+        },
+        clearTransferProjectIntent(state) {
+            state.projectTransferIntent = null;
+        },
+        setDisableProjectIntent(state, intent: Intent<ProjectPOTO>) {
+            state.projectDisableIntent = intent;
+        },
+        resolveDisableProjectIntent(state, result: IntentResult) {
+            if (state.projectDisableIntent) {
+                state.projectDisableIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newProjectIntent with empty intent")
+            }
+        },
+        clearDisableProjectIntent(state) {
+            state.projectDisableIntent = null;
         }
     },
     actions: {
@@ -85,6 +117,26 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearEditProjectIntent(context) {
             context.commit("clearEditProjectIntent")
+        },
+        setProjectTransferIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setTransferProjectIntent", intent)
+        },
+        resolveProjectTransferIntent(context, result: IntentResult) {
+            context.commit("resolveTransferProjectIntent", result);
+            context.commit("clearTransferProjectIntent");
+        },
+        clearProjectTransferIntent(context) {
+            context.commit("clearTransferProjectIntent")
+        },
+        setProjectDisableIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setDisableProjectIntent", intent)
+        },
+        resolveProjectDisableIntent(context, result: IntentResult) {
+            context.commit("resolveDisableProjectIntent", result);
+            context.commit("clearDisableProjectIntent");
+        },
+        clearProjectDisableIntent(context) {
+            context.commit("clearTransferProjectIntent")
         }
     },
 }

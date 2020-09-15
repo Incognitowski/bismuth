@@ -4,6 +4,8 @@ import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import Page from "@/domains/framework/data/Page";
 import UserPOTO from "@/domains/user/UserPOTO";
 import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
+import ProjectEventPOTO from "@/domains/project/projectEvent/ProjectEventPOTO";
+import ProjectTransferPOTO from "@/domains/project/ProjectTransferPOTO";
 
 export default class ProjectREST {
     private httpProvider: HttpProvider;
@@ -47,6 +49,18 @@ export default class ProjectREST {
 
     async detachUserFromProject(projectVisibility: ProjectVisibilityPOTO): Promise<AxiosResponse<ProjectVisibilityPOTO>> {
         return this.httpProvider.authInstance.delete("/project/" + projectVisibility.project_id + "/visibility/" + projectVisibility.project_visibility_id);
+    }
+
+    async getEventsRelatedToProject(projectId: string): Promise<AxiosResponse<Array<ProjectEventPOTO>>> {
+        return this.httpProvider.authInstance.get("/project/" + projectId + "/events");
+    }
+
+    async transferProject(projectTransferPOTO: ProjectTransferPOTO, projectId: string): Promise<AxiosResponse> {
+        return this.httpProvider.authInstance.put("/project/" + projectId + "/transfer", projectTransferPOTO);
+    }
+
+    async disableProject(projectId: string): Promise<AxiosResponse> {
+        return this.httpProvider.authInstance.delete("/project/" + projectId);
     }
 
 

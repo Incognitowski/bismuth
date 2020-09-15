@@ -1,6 +1,7 @@
 import ProjectREST from "@/domains/project/ProjectREST";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
+import ProjectTransferPOTO from "@/domains/project/ProjectTransferPOTO";
 
 export default class ProjectAPI {
 
@@ -40,6 +41,18 @@ export default class ProjectAPI {
 
     public async detachUserFromProject(projectVisibility: ProjectVisibilityPOTO){
         return await this.projectREST.detachUserFromProject(projectVisibility);
+    }
+
+    public async getEventsRelatedToProject(projectId: string){
+        return await this.projectREST.getEventsRelatedToProject(projectId);
+    }
+
+    public async transferProject(projectTransferPOTO : ProjectTransferPOTO, project : ProjectPOTO) {
+        return await this.projectREST.transferProject(projectTransferPOTO, project.projectId);
+    }
+
+    public async disableProject(project : ProjectPOTO) {
+        return await this.projectREST.disableProject(project.projectId);
     }
 
 }

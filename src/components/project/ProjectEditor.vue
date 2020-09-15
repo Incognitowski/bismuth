@@ -24,12 +24,13 @@
               centered
               grow
           >
-            <v-tab>Basic Information</v-tab>
+            <v-tab>Properties</v-tab>
             <v-tab>Access</v-tab>
             <v-tab>Events</v-tab>
+            <v-tab v-if="isProjectOwner()">Security</v-tab>
           </v-tabs>
         </v-row>
-        <v-tabs-items v-model="currentTab">
+        <v-tabs-items class="minCardHeight" v-model="currentTab">
           <v-tab-item>
             <v-form class="mt-10 mb-10">
               <v-row>
@@ -46,6 +47,7 @@
                             label="This project is publicly visible to everyone with its URL"></v-checkbox>
               </v-row>
               <v-row class="mb-10">
+                <p class="text-caption font-weight-light text--secondary">Project ID: {{ projectToEdit.projectId }}</p>
                 <v-spacer></v-spacer>
                 <v-btn
                     :loading="isLoading"
@@ -172,6 +174,51 @@
               <v-spacer/>
             </v-row>
           </v-tab-item>
+          <v-tab-item style="max-height: 500px; overflow-x: hidden; overflow-y: scroll;">
+            <v-row v-if="isLoadingProjectEvents">
+              <v-spacer/>
+              <v-progress-circular :indeterminate="true"/>
+              <v-spacer/>
+            </v-row>
+            <v-timeline
+                v-if="!isLoadingProjectEvents && eventsRelatedToProject != null"
+                dense
+            >
+              <v-timeline-item
+                  v-for="event in eventsRelatedToProject"
+                  :key="event.project_event_id"
+                  large
+              >
+                <v-card class="elevation-2">
+                  <v-card-title class="headline">{{ parseEventDate(event) }}</v-card-title>
+                  <v-card-text>
+                    {{ event.event }}
+                  </v-card-text>
+                </v-card>
+              </v-timeline-item>
+            </v-timeline>
+          </v-tab-item>
+          <v-tab-item v-if="isProjectOwner()">
+            <v-row>
+              <v-col cols="10">
+                <h2 class="font-weight-light">Transfer Ownership of Project</h2>
+                <p>Transfer the project to another user. You'll be demoted to manager of the project.</p>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-btn class="align-self-end" color="red" @click="startProjectTransferIntent">Transfer</v-btn>
+            </v-row>
+            <v-row>
+              <v-col cols="10">
+                <h2 class="font-weight-light">Disable Project</h2>
+                <p>The project will be disabled. No one will be able to see this project anymore.
+                  <b>You'll need to contact Bismuth in order to get information about this project after it's
+                    disabled.</b>
+                </p>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-btn class="align-self-end" color="red" @click="startProjectDisableIntent">Disable</v-btn>
+            </v-row>
+          </v-tab-item>
         </v-tabs-items>
       </v-container>
     </v-sheet>
@@ -181,7 +228,9 @@
     >
       <v-card :loading="isDetachingUserFromProject">
         <v-card-title>
-          <span>Detach "{{ userToDetach ? userToDetach.username : "" }}" from the "{{ projectToEdit ? projectToEdit.name : "" }}" project</span>
+          <span>Detach "{{
+              userToDetach ? userToDetach.username : ""
+            }}" from the "{{ projectToEdit ? projectToEdit.name : "" }}" project</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer/>
@@ -217,7 +266,7 @@
 <script lang="ts">
 import {Component, Vue, Watch} from 'vue-property-decorator';
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
-import {Intent, IntentResult} from "@/store/modules/Intents";
+import {Intent, IntentAction, IntentResult} from "@/store/modules/Intents";
 import ProjectAPI from "@/domains/project/ProjectAPI";
 import {AxiosError, AxiosResponse} from "axios";
 import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
@@ -229,6 +278,8 @@ import UserAPI from "@/domains/user/UserAPI";
 import UserCommons from "@/domains/user/UserCommons";
 import ProjectVisibilityPOTO from "@/domains/project/projectVisibility/ProjectVisibilityPOTO";
 import ProjectVisibilityConstants from "@/domains/project/projectVisibility/ProjectVisibilityConstants";
+import ProjectEventPOTO from "@/domains/project/projectEvent/ProjectEventPOTO";
+import {ProjectVisibilityEnum} from "@/domains/project/projectVisibility/ProjectVisibilityEnum";
 
 @Component
 export default class ProjectEditor extends Vue {
@@ -264,6 +315,9 @@ export default class ProjectEditor extends Vue {
 
   visibilityWithCurrentProject: ProjectVisibilityPOTO | null = null;
 
+  isLoadingProjectEvents = true;
+  eventsRelatedToProject: Array<ProjectEventPOTO> | null = null;
+
   constructor() {
     super();
     this.projectToEdit = new ProjectPOTO();
@@ -275,6 +329,33 @@ export default class ProjectEditor extends Vue {
     const editProjectIntent: Intent<ProjectPOTO> = this.$store.state.appIntents.editProjectIntent;
     Object.assign(this.projectToEdit, editProjectIntent.payload)
     this.searchForVisibilityWithCurrentProject();
+  }
+
+  parseEventDate(event: ProjectEventPOTO): string {
+    return DateCommons.parseDate(<number>event.createdAt);
+  }
+
+  loadEventsRelatedToProject() {
+    this.isLoadingProjectEvents = true;
+    this.hasError = false;
+    this.showSnackBar = false;
+    new ProjectAPI().getEventsRelatedToProject(this.projectToEdit.projectId).then((response: AxiosResponse<Array<ProjectEventPOTO>>) => {
+      this.eventsRelatedToProject = response.data;
+    }).catch((error: AxiosError) => {
+      let message: string;
+      try {
+        const exception = DefaultHTTPException.fromAxiosError(error);
+        message = exception.message;
+      } catch (e) {
+        message = e;
+      }
+      this.hasError = true;
+      this.isLoading = false;
+      this.snackBarText = message;
+      this.showSnackBar = true;
+    }).finally(() => {
+      this.isLoadingProjectEvents = false;
+    });
   }
 
   searchForVisibilityWithCurrentProject() {
@@ -460,6 +541,55 @@ export default class ProjectEditor extends Vue {
     })
   }
 
+  isProjectOwner(): boolean {
+    if (this.visibilityWithCurrentProject === null)
+      return false;
+    let parsedVisibility = ProjectVisibilityCommons.getVisibilityFrom(<string>this.visibilityWithCurrentProject.visibility);
+    return parsedVisibility == ProjectVisibilityEnum.OWNER;
+  }
+
+  startProjectTransferIntent() {
+    const intent: Intent<ProjectPOTO> = {
+      action: IntentAction.TRANSFER_PROJECT,
+      payload: this.projectToEdit,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result == IntentResult.INTENT_SUCCESS) {
+            this.isSheetOpen = false;
+            setTimeout(() => {
+              this.$store.dispatch("appIntents/resolveEditProjectIntent", IntentResult.INTENT_SUCCESS);
+            }, 250)
+          }
+        }
+      }
+    };
+    this.$store.dispatch(
+        "appIntents/setProjectTransferIntent",
+        intent
+    );
+  }
+
+  startProjectDisableIntent() {
+    const intent: Intent<ProjectPOTO> = {
+      action: IntentAction.DISABLE_PROJECT,
+      payload: this.projectToEdit,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result == IntentResult.INTENT_SUCCESS) {
+            this.isSheetOpen = false;
+            setTimeout(() => {
+              this.$store.dispatch("appIntents/resolveEditProjectIntent", IntentResult.INTENT_SUCCESS);
+            }, 250)
+          }
+        }
+      }
+    };
+    this.$store.dispatch(
+        "appIntents/setProjectDisableIntent",
+        intent
+    );
+  }
+
   @Watch("userSearchWord")
   onUserSearchWordChange(newSearchWord: string, oldSearchWord: string) {
     if (newSearchWord == null) return;
@@ -469,8 +599,14 @@ export default class ProjectEditor extends Vue {
 
   @Watch("currentTab")
   onCurrentTabChange(newTab: number, oldTab: number) {
-    if (newTab != 1) return;
-    this.loadUsersRelatedToProject();
+    switch (newTab) {
+      case 1:
+        this.loadUsersRelatedToProject();
+        break;
+      case 2:
+        this.loadEventsRelatedToProject();
+        break;
+    }
   }
 
 }
@@ -478,5 +614,9 @@ export default class ProjectEditor extends Vue {
 </script>
 
 <style scoped>
+
+.minCardHeight {
+  min-height: 400px;
+}
 
 </style>
