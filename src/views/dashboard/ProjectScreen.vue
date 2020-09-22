@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height mx-5">
+  <v-container fluid class="fill-height mx-5 overflow-y-auto">
 
     <v-row justify="center" v-if="isLoadingProjectOnStartup">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -62,8 +62,13 @@
       <v-progress-circular indeterminate/>
     </v-row>
 
-    <v-container fluid justify="center" style="min-height: 300px" v-if="!isLoadingProjectOnStartup && !loadingApps"
-                 class="px-0 mr-5 my-1">
+    <v-container
+        fluid
+        justify="center"
+        class="px-0 mr-5 my-1"
+        style="min-height: 300px;"
+        v-if="!isLoadingProjectOnStartup && !loadingApps"
+    >
       <v-row class="mb-2 mr-0" justify="center" v-for="app in searchedApps" :key="app.applicationId">
         <v-card class="px-5 py-5" style="width: 100%">
           <v-row
@@ -128,7 +133,6 @@ export default class ProjectScreen extends Vue {
 
   searchedApps: Array<ApplicationPOTO> | null = null;
 
-  hasAppSearchWord: boolean = false;
   appSearchWord: string = "";
 
   showSnackbar: boolean = false;
@@ -289,6 +293,10 @@ export default class ProjectScreen extends Vue {
 }
 </script>
 
-<style scoped>
+<style type="text/css" scoped>
+
+.main-container-height {
+  height: available;
+}
 
 </style>
