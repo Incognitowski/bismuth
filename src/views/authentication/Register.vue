@@ -1,12 +1,12 @@
 <template>
-    <v-card
+  <v-row justify="center" class="mt-5">
+    <v-card width="500"
             dark
             outlined
             :loading="cardLoader"
-            class="mx-auto d-flex flex-row"
     >
         <v-form>
-            <div class="py-5 px-8 d-flex flex-column" style="width: 350px">
+            <div class="py-5 px-8 d-flex flex-column">
                 <h1 class="mb-5">Register</h1>
                 <v-text-field
                         dense
@@ -65,6 +65,7 @@
             {{ successMessage }}
         </v-snackbar>
     </v-card>
+  </v-row>
 </template>
 
 <script lang="ts">

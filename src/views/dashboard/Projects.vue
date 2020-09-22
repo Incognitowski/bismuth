@@ -38,7 +38,7 @@
           </thead>
           <tbody>
           <tr v-for="project in projects.content" :key="project.projectId">
-            <td>{{ project.name }}</td>
+            <td @click="openProjectScreen(project)" style="cursor: pointer; text-decoration: underline">{{ project.name }}</td>
             <td>{{ parseDate(project.createdAt) }}</td>
             <td>{{ project.createdBy.username }}</td>
             <td v-if="project.active" class="green--text">Active</td>
@@ -113,6 +113,10 @@ export default class Projects extends Vue {
 
   mounted() {
     this.searchForProjects();
+  }
+
+  openProjectScreen(project : ProjectPOTO){
+    this.$router.push("/project/" + project.projectId);
   }
 
   searchForProjects() {

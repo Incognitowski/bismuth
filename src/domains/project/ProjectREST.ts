@@ -18,6 +18,10 @@ export default class ProjectREST {
         return this.httpProvider.authInstance.get("/project/search-by-name/" + queryString);
     }
 
+    public getById(projectId: string): Promise<AxiosResponse<ProjectPOTO>> {
+        return this.httpProvider.authInstance.get("/project/" + projectId);
+    }
+
     public createProject(newProject: ProjectPOTO): Promise<AxiosResponse<ProjectPOTO>> {
         return this.httpProvider.authInstance.post("/project", newProject);
     }

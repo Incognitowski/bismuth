@@ -18,9 +18,7 @@
         <p v-if="!isActionAvailable" class="my-auto mr-3 text-caption text--secondary">
           The action will be available in {{ remainingSeconds }} seconds...
         </p>
-        <v-btn v-if="isActionAvailable" :disabled="isLoading" class="mr-3" color="green darken-1" text @click="confirmDisable">CONFIRM
-          TRANSFERENCE
-        </v-btn>
+        <v-btn v-if="isActionAvailable" :disabled="isLoading" class="mr-3" color="green darken-1" text @click="confirmDisable">CONFIRM</v-btn>
         <v-btn :disabled="isLoading" class="mr-3" color="red darken-1" text @click="cancelDisable">CANCEL</v-btn>
       </v-card-actions>
     </v-card>

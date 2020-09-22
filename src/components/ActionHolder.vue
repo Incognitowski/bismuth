@@ -1,9 +1,13 @@
 <template>
   <div>
+    <!-- PROJECT RELATED COMPONENTS -->
     <ProjectCreator v-if="isCreatingNewProject"/>
     <ProjectEditor v-if="isEditingProject"/>
     <ProjectOwnershipTransferCard v-if="isTransferringProjectOwnership"/>
     <ProjectDisablingCard v-if="isDisablingProject"/>
+
+    <!-- APP RELATED COMPONENTS -->
+    <AppCreator v-if="isCreatingNewApplication"/>
   </div>
 </template>
 
@@ -15,9 +19,12 @@ import ProjectCreator from "@/components/project/ProjectCreator.vue";
 import ProjectEditor from "@/components/project/ProjectEditor.vue";
 import ProjectOwnershipTransferCard from "@/components/project/ProjectOwnershipTransferCard.vue";
 import ProjectDisablingCard from "@/components/project/ProjectDisablingCard.vue";
+import AppCreator from "@/components/application/AppCreator.vue";
+import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 
 @Component({
   components: {
+    AppCreator,
     ProjectDisablingCard,
     ProjectOwnershipTransferCard,
     ProjectEditor,
@@ -30,6 +37,7 @@ export default class ActionHolder extends Vue {
   isEditingProject: boolean = false;
   isTransferringProjectOwnership: boolean = false;
   isDisablingProject: boolean = false;
+  isCreatingNewApplication: boolean = false;
 
   get newProjectIntent() {
     return this.$store.state.appIntents.newProjectIntent;
@@ -45,6 +53,10 @@ export default class ActionHolder extends Vue {
 
   get disableProjectIntent() {
     return this.$store.state.appIntents.projectDisableIntent;
+  }
+
+  get newAppIntent() {
+    return this.$store.state.appIntents.newApplicationIntent;
   }
 
   @Watch('disableProjectIntent')
@@ -93,6 +105,18 @@ export default class ActionHolder extends Vue {
       return;
     }
     this.isEditingProject = true;
+  }
+
+  @Watch('newAppIntent')
+  onNewApplicationIntentChange(
+      newIntent: Intent<ApplicationPOTO> | null,
+      oldIntent: Intent<ApplicationPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isCreatingNewApplication = false;
+      return;
+    }
+    this.isCreatingNewApplication = true;
   }
 
 }

@@ -1,12 +1,17 @@
 import {Module} from "vuex";
 import {RootState} from "@/store";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
+import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 
 export enum IntentAction {
     NEW_PROJECT,
     EDIT_PROJECT,
     TRANSFER_PROJECT,
     DISABLE_PROJECT,
+    NEW_APPLICATION,
+    EDIT_APPLICATION,
+    TRANSFER_APPLICATION,
+    DISABLE_APPLICATION,
 }
 
 export enum IntentResult {
@@ -30,6 +35,7 @@ export interface IntentsState {
     editProjectIntent: Intent<ProjectPOTO> | null,
     projectTransferIntent: Intent<ProjectPOTO> | null,
     projectDisableIntent: Intent<ProjectPOTO> | null,
+    newApplicationIntent: Intent<ApplicationPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -39,6 +45,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         editProjectIntent: null,
         projectTransferIntent: null,
         projectDisableIntent: null,
+        newApplicationIntent: null,
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -92,7 +99,20 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearDisableProjectIntent(state) {
             state.projectDisableIntent = null;
-        }
+        },
+        setNewApplicationIntent(state, intent: Intent<ApplicationPOTO>) {
+            state.newApplicationIntent = intent;
+        },
+        resolveNewApplicationIntent(state, result: IntentResult) {
+            if (state.newApplicationIntent) {
+                state.newApplicationIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newApplicationIntent with empty intent")
+            }
+        },
+        clearNewApplicationIntent(state) {
+            state.newApplicationIntent = null;
+        },
     },
     actions: {
         setGlobalLoadingState(context, shouldLoad: boolean) {
@@ -137,6 +157,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearProjectDisableIntent(context) {
             context.commit("clearTransferProjectIntent")
-        }
+        },
+        setNewApplicationIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setNewApplicationIntent", intent)
+        },
+        resolveNewApplicationIntent(context, result: IntentResult) {
+            context.commit("resolveNewApplicationIntent", result);
+            context.commit("clearNewApplicationIntent");
+        },
+        clearNewApplicationIntent(context) {
+            context.commit("clearNewApplicationIntent")
+        },
     },
 }

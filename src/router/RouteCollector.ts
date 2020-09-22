@@ -3,6 +3,7 @@ import LoginRoute from "./Routes/LoginRoute";
 import RegisterRoute from "@/router/Routes/RegisterRoute";
 import DashboardRoute from "@/router/Routes/DashboardRoute";
 import ProjectsRoute from "@/router/Routes/ProjectsRoute";
+import ProjectRoute from "@/router/Routes/ProjectRoute";
 
 export default class RouteCollector {
     static routes(): Array<RouteConfig> {
@@ -10,7 +11,8 @@ export default class RouteCollector {
             LoginRoute.route(),
             RegisterRoute.route(),
             DashboardRoute.route(),
-            ProjectsRoute.route()
+            ProjectsRoute.route(),
+            ProjectRoute.route()
         ];
     }
 }

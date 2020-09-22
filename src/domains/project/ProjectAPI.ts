@@ -11,6 +11,10 @@ export default class ProjectAPI {
         this.projectREST = new ProjectREST();
     }
 
+    public async getById(projectId: string) {
+        return await this.projectREST.getById(projectId);
+    }
+
     public async searchProjectsByString(searchString: string) {
         return await this.projectREST.queryProjects(searchString);
     }
