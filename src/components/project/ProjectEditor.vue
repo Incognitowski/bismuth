@@ -199,15 +199,14 @@
             </v-timeline>
           </v-tab-item>
           <v-tab-item v-if="isProjectOwner()">
-            <v-row>
+            <v-row justify="space-between">
               <v-col cols="10">
                 <h2 class="font-weight-light">Transfer Ownership of Project</h2>
                 <p>Transfer the project to another user. You'll be demoted to manager of the project.</p>
               </v-col>
-              <v-spacer></v-spacer>
               <v-btn class="align-self-end" color="red" @click="startProjectTransferIntent">Transfer</v-btn>
             </v-row>
-            <v-row>
+            <v-row justify="space-between">
               <v-col cols="10">
                 <h2 class="font-weight-light">Disable Project</h2>
                 <p>The project will be disabled. No one will be able to see this project anymore.
@@ -215,7 +214,6 @@
                     disabled.</b>
                 </p>
               </v-col>
-              <v-spacer></v-spacer>
               <v-btn class="align-self-end" color="red" @click="startProjectDisableIntent">Disable</v-btn>
             </v-row>
           </v-tab-item>
