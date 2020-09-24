@@ -10,7 +10,10 @@
     <AppCreator v-if="isCreatingNewApplication"/>
 
     <!-- OBJECT DICTIONARY RELATED COMPONENTS -->
-     <ObjectDictionaryCreator v-if="isCreatingNewObjectDictionary"/>
+    <ObjectDictionaryCreator v-if="isCreatingNewObjectDictionary"/>
+
+    <!-- HTTP API RELATED COMPONENTS -->
+    <HttpAPICreator v-if="isCreatingNewHttpAPI"/>
 
   </div>
 </template>
@@ -26,9 +29,11 @@ import ProjectDisablingCard from "@/components/project/ProjectDisablingCard.vue"
 import AppCreator from "@/components/application/AppCreator.vue";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 import ObjectDictionaryCreator from "@/components/objectDictionary/ObjectDictionaryCreator.vue";
+import HttpAPICreator from "@/components/httpAPI/HttpAPICreator.vue";
 
 @Component({
   components: {
+    HttpAPICreator,
     ObjectDictionaryCreator,
     AppCreator,
     ProjectDisablingCard,
@@ -45,6 +50,7 @@ export default class ActionHolder extends Vue {
   isDisablingProject: boolean = false;
   isCreatingNewApplication: boolean = false;
   isCreatingNewObjectDictionary: boolean = false;
+  isCreatingNewHttpAPI: boolean = false;
 
   get newProjectIntent() {
     return this.$store.state.appIntents.newProjectIntent;
@@ -68,6 +74,10 @@ export default class ActionHolder extends Vue {
 
   get newObjectDictionaryIntent() {
     return this.$store.state.appIntents.newObjectDictionaryIntent;
+  }
+
+  get newHttpAPIIntent() {
+    return this.$store.state.appIntents.newHttpAPIIntent;
   }
 
   @Watch('disableProjectIntent')
@@ -140,6 +150,18 @@ export default class ActionHolder extends Vue {
       return;
     }
     this.isCreatingNewObjectDictionary = true;
+  }
+
+  @Watch('newHttpAPIIntent')
+  onNewHttpAPIIntentChange(
+      newIntent: Intent<ApplicationPOTO> | null,
+      oldIntent: Intent<ApplicationPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isCreatingNewHttpAPI = false;
+      return;
+    }
+    this.isCreatingNewHttpAPI = true;
   }
 
 }

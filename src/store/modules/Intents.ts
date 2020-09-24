@@ -58,6 +58,7 @@ export interface IntentsState {
     projectDisableIntent: Intent<ProjectPOTO> | null,
     newApplicationIntent: Intent<ApplicationPOTO> | null,
     newObjectDictionaryIntent: Intent<ApplicationPOTO> | null,
+    newHttpAPIIntent: Intent<ApplicationPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -69,6 +70,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         projectDisableIntent: null,
         newApplicationIntent: null,
         newObjectDictionaryIntent: null,
+        newHttpAPIIntent: null,
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -149,6 +151,19 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         clearNewObjectDictionaryIntent(state) {
             state.newObjectDictionaryIntent = null;
         },
+        setNewHttpAPIIntent(state, intent: Intent<ApplicationPOTO>) {
+            state.newHttpAPIIntent = intent;
+        },
+        resolveNewHttpAPIIntent(state, result: IntentResult) {
+            if (state.newHttpAPIIntent) {
+                state.newHttpAPIIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newHttpAPIIntent with empty intent")
+            }
+        },
+        clearNewHttpAPIIntent(state) {
+            state.newHttpAPIIntent = null;
+        },
     },
     actions: {
         setGlobalLoadingState(context, shouldLoad: boolean) {
@@ -213,6 +228,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewObjectDictionaryIntent(context) {
             context.commit("clearNewObjectDictionaryIntent")
+        },
+        setNewHttpAPIIntent(context, intent: Intent<ApplicationPOTO>) {
+            context.commit("setNewHttpAPIIntent", intent)
+        },
+        resolveNewHttpAPIIntent(context, result: IntentResult) {
+            context.commit("resolveNewHttpAPIIntent", result);
+            context.commit("clearNewHttpAPIIntent");
+        },
+        clearNewHttpAPIIntent(context) {
+            context.commit("clearNewHttpAPIIntent")
         },
     },
 }

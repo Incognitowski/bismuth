@@ -81,9 +81,11 @@
         <v-row justify="center" v-if="isLoadingArtifacts">
           <v-progress-circular indeterminate/>
         </v-row>
-        <v-row justify="center" v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0)">
+        <v-row justify="center" v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0 && loadedHttpAPIs.length === 0)">
           <p class="font-weight-light text--secondary mt-5 ml-3">No artifact found of this type on this application.</p>
         </v-row>
+
+        <!-- OBJECT DICTIONARIES -->
         <v-list
             dense
             shaped
@@ -104,6 +106,29 @@
             </v-list-item>
           </v-list-item-group>
         </v-list>
+
+        <!-- HTTP APIs -->
+        <v-list
+            dense
+            shaped
+            color="#00000000"
+            v-if="!isLoadingArtifacts && loadedHttpAPIs.length > 0"
+        >
+          <v-subheader class="text-center">
+            Http APIs
+          </v-subheader>
+          <v-list-item-group color="primary">
+            <v-list-item
+                v-for="httpAPI in loadedHttpAPIs"
+                :key="httpAPI.httpAPIId"
+            >
+              <v-list-item-content>
+                <v-list-item-title v-text="httpAPI.name"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+
       </v-col>
 
     </v-row>
@@ -128,6 +153,8 @@ import {Intent, IntentAction, IntentResult} from "@/store/modules/Intents";
 import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDictionaryAPI";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
 import ExceptionCommons from "@/domains/framework/ExceptionCommons";
+import HttpAPIAPI from "@/domains/artifacts/httpAPI/HttpAPIAPI";
+import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
 
 @Component
 export default class ApplicationScreen extends Vue {
@@ -150,6 +177,7 @@ export default class ApplicationScreen extends Vue {
   ];
 
   loadedObjectDictionaries: Array<ObjectDictionaryPOTO> = [];
+  loadedHttpAPIs: Array<HttpAPIPOTO> = [];
 
   mounted() {
     if (this.$store.state.project.selectedProject == null) {
@@ -202,6 +230,9 @@ export default class ApplicationScreen extends Vue {
       case ArtifactTypes.OBJECT_DICTIONARY:
         this.openObjectDictionaryArtifactCreator();
         break;
+      case ArtifactTypes.HTTP_API:
+        this.openHttpAPIArtifactCreator();
+        break;
         //todo ArtifactTypes.TEXT_DOCUMENT
         //todo ArtifactTypes.HTTP_API
     }
@@ -209,10 +240,14 @@ export default class ApplicationScreen extends Vue {
 
   loadDocumentsOfType(type: DocumentationTypeHolder) {
     this.loadedObjectDictionaries = [];
+    this.loadedHttpAPIs = [];
+    this.selectedDocumentationType = type;
     switch (type.type) {
       case ArtifactTypes.OBJECT_DICTIONARY:
-        this.selectedDocumentationType = type;
         this.loadObjectDictionaryArtifacts();
+        break;
+      case ArtifactTypes.HTTP_API:
+        this.loadHttpAPIArtifacts();
         break;
         //todo ArtifactTypes.TEXT_DOCUMENT
         //todo ArtifactTypes.HTTP_API
@@ -234,6 +269,21 @@ export default class ApplicationScreen extends Vue {
     this.$store.dispatch("appIntents/setNewObjectDictionaryIntent", newObjectDictionaryArtifactIntent);
   }
 
+  openHttpAPIArtifactCreator() {
+    const intent: Intent<ApplicationPOTO> = {
+      action: IntentAction.NEW_HTTP_API_ARTIFACT,
+      payload: <ApplicationPOTO>this.currentApplication,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result == IntentResult.INTENT_SUCCESS) {
+            this.loadDocumentsOfType(this.documentationTypes[2]);
+          }
+        }
+      }
+    }
+    this.$store.dispatch("appIntents/setNewHttpAPIIntent", intent);
+  }
+
   private loadObjectDictionaryArtifacts() {
     this.isLoadingArtifacts = true;
     new ObjectDictionaryAPI().getObjectDictionariesInApp(
@@ -241,6 +291,21 @@ export default class ApplicationScreen extends Vue {
         <string>this.currentApplication?.applicationId
     ).then((response: AxiosResponse<Array<ObjectDictionaryPOTO>>) => {
       this.loadedObjectDictionaries = response.data;
+    }).catch((error: AxiosError) => {
+      this.showSnackbar = true;
+      this.snackBarText = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoadingArtifacts = false;
+    })
+  }
+
+  private loadHttpAPIArtifacts() {
+    this.isLoadingArtifacts = true;
+    new HttpAPIAPI().getHttpAPIsVisibileInApp(
+        <string>this.currentProject?.projectId,
+        <string>this.currentApplication?.applicationId
+    ).then((response: AxiosResponse<Array<HttpAPIPOTO>>) => {
+      this.loadedHttpAPIs = response.data;
     }).catch((error: AxiosError) => {
       this.showSnackbar = true;
       this.snackBarText = ExceptionCommons.parseErrorMessage(error);
