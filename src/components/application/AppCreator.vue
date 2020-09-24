@@ -127,6 +127,7 @@ export default class AppCreator extends Vue {
           } catch (e) {
             message = e;
           }
+          this.hasError = true;
           this.errorMessage = message;
         })
         .finally(() => {
