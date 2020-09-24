@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height mx-5 overflow-y-auto">
+  <v-container fluid class="mx-5 overflow-y-auto">
 
     <v-row justify="center" v-if="isLoadingProjectOnStartup">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -69,7 +69,7 @@
         style="min-height: 300px;"
         v-if="!isLoadingProjectOnStartup && !loadingApps"
     >
-      <v-row class="mb-2 mr-0" justify="center" v-for="app in searchedApps" :key="app.applicationId">
+      <v-row class="mb-2 mr-0 mr-5" justify="center" v-for="app in searchedApps" :key="app.applicationId">
         <v-card class="px-5 py-5" style="width: 100%">
           <v-row
               justify="space-between"

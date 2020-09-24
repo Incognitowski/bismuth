@@ -4,14 +4,35 @@ import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 
 export enum IntentAction {
+    // PROJECT RELATED INTENTS
     NEW_PROJECT,
     EDIT_PROJECT,
     TRANSFER_PROJECT,
     DISABLE_PROJECT,
+
+    // APP RELATED INTENTS
     NEW_APPLICATION,
     EDIT_APPLICATION,
     TRANSFER_APPLICATION,
     DISABLE_APPLICATION,
+
+    // OBJECT DICTIONARY ARTIFACT RELATED INTENTS
+    NEW_OBJECT_DICTIONARY_ARTIFACT,
+    EDIT_OBJECT_DICTIONARY_ARTIFACT,
+    TRANSFER_OBJECT_DICTIONARY_ARTIFACT,
+    DISABLE_OBJECT_DICTIONARY_ARTIFACT,
+
+    // TEXT DOCUMENT ARTIFACT RELATED INTENTS
+    NEW_TEXT_DOCUMENT_ARTIFACT,
+    EDIT_TEXT_DOCUMENT_ARTIFACT,
+    TRANSFER_TEXT_DOCUMENT_ARTIFACT,
+    DISABLE_TEXT_DOCUMENT_ARTIFACT,
+
+    // HTTP API ARTIFACT RELATED INTENTS
+    NEW_HTTP_API_ARTIFACT,
+    EDIT_HTTP_API_ARTIFACT,
+    TRANSFER_HTTP_API_ARTIFACT,
+    DISABLE_HTTP_API_ARTIFACT,
 }
 
 export enum IntentResult {
@@ -36,6 +57,7 @@ export interface IntentsState {
     projectTransferIntent: Intent<ProjectPOTO> | null,
     projectDisableIntent: Intent<ProjectPOTO> | null,
     newApplicationIntent: Intent<ApplicationPOTO> | null,
+    newObjectDictionaryIntent: Intent<ApplicationPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -46,6 +68,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         projectTransferIntent: null,
         projectDisableIntent: null,
         newApplicationIntent: null,
+        newObjectDictionaryIntent: null,
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -113,6 +136,19 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         clearNewApplicationIntent(state) {
             state.newApplicationIntent = null;
         },
+        setNewObjectDictionaryIntent(state, intent: Intent<ApplicationPOTO>) {
+            state.newObjectDictionaryIntent = intent;
+        },
+        resolveNewObjectDictionaryIntent(state, result: IntentResult) {
+            if (state.newObjectDictionaryIntent) {
+                state.newObjectDictionaryIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newObjectDictionaryIntent with empty intent")
+            }
+        },
+        clearNewObjectDictionaryIntent(state) {
+            state.newObjectDictionaryIntent = null;
+        },
     },
     actions: {
         setGlobalLoadingState(context, shouldLoad: boolean) {
@@ -167,6 +203,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewApplicationIntent(context) {
             context.commit("clearNewApplicationIntent")
+        },
+        setNewObjectDictionaryIntent(context, intent: Intent<ApplicationPOTO>) {
+            context.commit("setNewObjectDictionaryIntent", intent)
+        },
+        resolveNewObjectDictionaryIntent(context, result: IntentResult) {
+            context.commit("resolveNewObjectDictionaryIntent", result);
+            context.commit("clearNewObjectDictionaryIntent");
+        },
+        clearNewObjectDictionaryIntent(context) {
+            context.commit("clearNewObjectDictionaryIntent")
         },
     },
 }

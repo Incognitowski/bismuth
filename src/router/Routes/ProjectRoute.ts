@@ -6,7 +6,7 @@ export default class ProjectRoute {
             path: "/project/:projectId",
             name: "Project",
             component: () =>
-                import(/* webpackChunkName: "about" */ "@/views/dashboard/ProjectScreen.vue"),
+                import(/* webpackChunkName: "project" */ "@/views/dashboard/ProjectScreen.vue"),
         };
     }
 }

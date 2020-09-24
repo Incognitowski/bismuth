@@ -8,6 +8,10 @@
 
     <!-- APP RELATED COMPONENTS -->
     <AppCreator v-if="isCreatingNewApplication"/>
+
+    <!-- OBJECT DICTIONARY RELATED COMPONENTS -->
+     <ObjectDictionaryCreator v-if="isCreatingNewObjectDictionary"/>
+
   </div>
 </template>
 
@@ -21,9 +25,11 @@ import ProjectOwnershipTransferCard from "@/components/project/ProjectOwnershipT
 import ProjectDisablingCard from "@/components/project/ProjectDisablingCard.vue";
 import AppCreator from "@/components/application/AppCreator.vue";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
+import ObjectDictionaryCreator from "@/components/objectDictionary/ObjectDictionaryCreator.vue";
 
 @Component({
   components: {
+    ObjectDictionaryCreator,
     AppCreator,
     ProjectDisablingCard,
     ProjectOwnershipTransferCard,
@@ -38,6 +44,7 @@ export default class ActionHolder extends Vue {
   isTransferringProjectOwnership: boolean = false;
   isDisablingProject: boolean = false;
   isCreatingNewApplication: boolean = false;
+  isCreatingNewObjectDictionary: boolean = false;
 
   get newProjectIntent() {
     return this.$store.state.appIntents.newProjectIntent;
@@ -57,6 +64,10 @@ export default class ActionHolder extends Vue {
 
   get newAppIntent() {
     return this.$store.state.appIntents.newApplicationIntent;
+  }
+
+  get newObjectDictionaryIntent() {
+    return this.$store.state.appIntents.newObjectDictionaryIntent;
   }
 
   @Watch('disableProjectIntent')
@@ -117,6 +128,18 @@ export default class ActionHolder extends Vue {
       return;
     }
     this.isCreatingNewApplication = true;
+  }
+
+  @Watch('newObjectDictionaryIntent')
+  onNewObjectDictionaryIntentChange(
+      newIntent: Intent<ApplicationPOTO> | null,
+      oldIntent: Intent<ApplicationPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isCreatingNewObjectDictionary = false;
+      return;
+    }
+    this.isCreatingNewObjectDictionary = true;
   }
 
 }

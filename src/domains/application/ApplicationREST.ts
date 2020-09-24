@@ -15,6 +15,10 @@ export default class ApplicationREST {
         return this.httpProvider.authInstance.post("/project/" + application.projectId + "/application", application);
     }
 
+    public getApplication(projectId: string, applicationId: string): Promise<AxiosResponse<ApplicationPOTO>> {
+        return this.httpProvider.authInstance.get("/project/" + projectId + "/application/" + applicationId);
+    }
+
     public queryApplications(projectId: string, queryString: string): Promise<AxiosResponse<Array<ApplicationPOTO>>> {
         return this.httpProvider.authInstance.get("/project/" + projectId + "/application/search-by-name/" + queryString);
     }

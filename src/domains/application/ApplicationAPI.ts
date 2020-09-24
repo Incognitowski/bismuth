@@ -21,4 +21,10 @@ export default class ApplicationAPI {
         return await this.applicationREST.getAllApplications(projectId, page, size);
     }
 
+    public async getApplication(projectId: string, applicationId : string) {
+        return await this.applicationREST.getApplication(projectId, applicationId);
+    }
+
+
+
 }

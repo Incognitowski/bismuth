@@ -6,7 +6,7 @@ export default class ProjectsRoute {
             path: "/dashboard/projects",
             name: "Projects",
             component: () =>
-                import(/* webpackChunkName: "about" */ "@/views/dashboard/Projects.vue"),
+                import(/* webpackChunkName: "projects" */ "@/views/dashboard/Projects.vue"),
         };
     }
 }

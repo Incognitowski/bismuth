@@ -6,7 +6,7 @@ export default class LoginRoute {
       path: "/login",
       name: "Login",
       component: () =>
-        import(/* webpackChunkName: "about" */ "@/views/authentication/Login.vue"),
+        import(/* webpackChunkName: "login" */ "@/views/authentication/Login.vue"),
     };
   }
 }

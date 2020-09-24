@@ -6,7 +6,7 @@ export default class DashboardRoute {
             path: "/dashboard",
             name: "Dashboard",
             component: () =>
-                import(/* webpackChunkName: "about" */ "@/views/dashboard/Dashboard.vue"),
+                import(/* webpackChunkName: "dashboard" */ "@/views/dashboard/Dashboard.vue"),
         };
     }
 }

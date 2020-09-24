@@ -6,7 +6,7 @@ export default class RegisterRoute {
             path: "/register",
             name: "Register",
             component: () =>
-                import(/* webpackChunkName: "about" */ "@/views/authentication/Register.vue"),
+                import(/* webpackChunkName: "register" */ "@/views/authentication/Register.vue"),
         };
     }
 }
