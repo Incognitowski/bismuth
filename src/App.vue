@@ -67,7 +67,7 @@ export default class App extends Vue {
 
   private redirectToLoginIfNotAlready() {
     if (this.$route.name != 'Login')
-      this.$router.push('/login');
+      this.$router.replace('/login');
   }
 
   private redirectToDashboardIfNotAlready() {

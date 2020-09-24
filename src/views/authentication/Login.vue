@@ -58,8 +58,9 @@
             this.$store.dispatch("appState/setLeftToolbarVisibility", false);
             this.$store.dispatch("appState/setRightToolbarVisibility", false);
             this.$store.dispatch("appState/setTopToolbarVisibility", false);
-            if (new AuthenticationAPI().isLoggedIn())
-                this.$router.push('/dashboard')
+            if (new AuthenticationAPI().isLoggedIn()){
+              this.validateJWT();
+            }
         }
 
         async attemptLogin() {
@@ -84,6 +85,14 @@
             if (this.isLoading) return "purple darken-1";
             return null;
         }
+
+      private validateJWT() {
+        new AuthenticationAPI().validateJWT().then(() => {
+          this.$router.push('/dashboard');
+        }).catch(() => {
+          console.log("Got to Login page when it really had to.");
+        })
+      }
 
     }
 </script>

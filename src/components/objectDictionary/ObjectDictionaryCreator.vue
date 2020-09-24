@@ -12,7 +12,7 @@
           <h2>New Object Dictionary</h2>
           <v-spacer/>
           <v-btn
-              :disabled="isLoading"
+              :disabled="isLoading || isDoneCreating"
               text
               color="red"
               @click="cancelObjectDictionaryCreation"
@@ -33,7 +33,7 @@
           </v-row>
           <v-row>
             <v-text-field
-                :disabled="isLoading"
+                :disabled="isLoading || isDoneCreating"
                 v-model="newObjectDictionary.name"
                 label="Object Dictionary Name"
                 outlined
@@ -42,7 +42,7 @@
           </v-row>
           <v-row>
             <v-checkbox
-                :disabled="isLoading"
+                :disabled="isLoading || isDoneCreating"
                 class="mx-auto"
                 v-model="newObjectDictionary.isPubliclyVisible"
                 label="This Object Dictionary is publicly visible to everyone with its URL"
@@ -52,7 +52,7 @@
             <v-spacer/>
             <v-btn
                 :loading="isLoading"
-                :disabled="isLoading"
+                :disabled="isLoading || isDoneCreating"
                 text
                 color="success"
                 @click="confirmCreation"
@@ -74,6 +74,9 @@ import {Vue, Component} from 'vue-property-decorator';
 import ApplicationPOTO from "../../domains/application/ApplicationPOTO";
 import {Intent, IntentResult} from "@/store/modules/Intents";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
+import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDictionaryAPI";
+import {AxiosError, AxiosResponse} from "axios";
+import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
 
 @Component
 export default class ObjectDictionaryCreator extends Vue {
@@ -97,7 +100,31 @@ export default class ObjectDictionaryCreator extends Vue {
   }
 
   confirmCreation() {
-    //TODO
+    this.isLoading = true;
+    this.hasError = false;
+    new ObjectDictionaryAPI().createObjectDictionary(
+        <string>this.currentApplication?.project.projectId,
+        <string>this.currentApplication?.applicationId,
+        this.newObjectDictionary
+    ).then((response: AxiosResponse<ObjectDictionaryPOTO>) => {
+      this.isDoneCreating = true;
+      this.successMessage = "You just created the " + this.newObjectDictionary.name + " dictionary of objects. You will be redirected...";
+      setTimeout(() => {
+        this.$store.dispatch("appIntents/resolveNewObjectDictionaryIntent", IntentResult.INTENT_SUCCESS);
+      }, 2000);
+    }).catch((error: AxiosError) => {
+      let message: string;
+      try {
+        const exception = DefaultHTTPException.fromAxiosError(error);
+        message = exception.message;
+      } catch (e) {
+        message = e;
+      }
+      this.hasError = true;
+      this.errorMessage = message;
+    }).finally(() => {
+      this.isLoading = false;
+    })
   }
 
   cancelObjectDictionaryCreation() {
