@@ -11,6 +11,7 @@
 
     <!-- OBJECT DICTIONARY RELATED COMPONENTS -->
     <ObjectDictionaryCreator v-if="isCreatingNewObjectDictionary"/>
+    <ObjectDictionaryManagerDrawer v-if="isEditingObjectManager"/>
 
     <!-- HTTP API RELATED COMPONENTS -->
     <HttpAPICreator v-if="isCreatingNewHttpAPI"/>
@@ -30,9 +31,11 @@ import AppCreator from "@/components/application/AppCreator.vue";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 import ObjectDictionaryCreator from "@/components/objectDictionary/ObjectDictionaryCreator.vue";
 import HttpAPICreator from "@/components/httpAPI/HttpAPICreator.vue";
+import ObjectDictionaryManagerDrawer from "@/components/objectDictionary/ObjectDictionaryManagerDrawer.vue";
 
 @Component({
   components: {
+    ObjectDictionaryManagerDrawer,
     HttpAPICreator,
     ObjectDictionaryCreator,
     AppCreator,
@@ -48,8 +51,12 @@ export default class ActionHolder extends Vue {
   isEditingProject: boolean = false;
   isTransferringProjectOwnership: boolean = false;
   isDisablingProject: boolean = false;
+
   isCreatingNewApplication: boolean = false;
+
   isCreatingNewObjectDictionary: boolean = false;
+  isEditingObjectManager: boolean = false;
+
   isCreatingNewHttpAPI: boolean = false;
 
   get newProjectIntent() {
@@ -74,6 +81,10 @@ export default class ActionHolder extends Vue {
 
   get newObjectDictionaryIntent() {
     return this.$store.state.appIntents.newObjectDictionaryIntent;
+  }
+
+  get editObjectDictionaryIntent() {
+    return this.$store.state.appIntents.editObjectDictionaryIntent;
   }
 
   get newHttpAPIIntent() {
@@ -150,6 +161,18 @@ export default class ActionHolder extends Vue {
       return;
     }
     this.isCreatingNewObjectDictionary = true;
+  }
+
+  @Watch('editObjectDictionaryIntent')
+  onEditObjectDictionaryIntentChange(
+      newIntent: Intent<ApplicationPOTO> | null,
+      oldIntent: Intent<ApplicationPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isEditingObjectManager = false;
+      return;
+    }
+    this.isEditingObjectManager = true;
   }
 
   @Watch('newHttpAPIIntent')

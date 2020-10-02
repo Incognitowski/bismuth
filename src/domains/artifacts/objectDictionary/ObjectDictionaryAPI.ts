@@ -24,4 +24,12 @@ export default class ObjectDictionaryAPI {
         return await this.objectDictionaryREST.getObjectDictionariesInApp(projectId, applicationId);
     }
 
+    public async getObjectDictionary(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+    ) {
+        return await this.objectDictionaryREST.getObjectDictionary(projectId, applicationId, objectDictionaryId);
+    }
+
 }

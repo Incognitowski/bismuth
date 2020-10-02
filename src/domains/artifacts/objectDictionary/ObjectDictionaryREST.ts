@@ -30,4 +30,9 @@ export default class ObjectDictionaryREST {
         );
     }
 
+    async getObjectDictionary(projectId: string, applicationId: string, objectDictionaryId: string) {
+        return this.httpProvider.authInstance.get(
+            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary/" + objectDictionaryId
+        );
+    }
 }

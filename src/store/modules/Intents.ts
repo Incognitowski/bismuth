@@ -2,6 +2,7 @@ import {Module} from "vuex";
 import {RootState} from "@/store";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
+import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
 
 export enum IntentAction {
     // PROJECT RELATED INTENTS
@@ -59,6 +60,7 @@ export interface IntentsState {
     newApplicationIntent: Intent<ApplicationPOTO> | null,
     newObjectDictionaryIntent: Intent<ApplicationPOTO> | null,
     newHttpAPIIntent: Intent<ApplicationPOTO> | null,
+    editObjectDictionaryIntent: Intent<ObjectDictionaryPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -70,6 +72,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         projectDisableIntent: null,
         newApplicationIntent: null,
         newObjectDictionaryIntent: null,
+        editObjectDictionaryIntent: null,
         newHttpAPIIntent: null,
     },
     mutations: {
@@ -151,6 +154,19 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         clearNewObjectDictionaryIntent(state) {
             state.newObjectDictionaryIntent = null;
         },
+        setEditObjectDictionaryIntent(state, intent: Intent<ObjectDictionaryPOTO>) {
+            state.editObjectDictionaryIntent = intent;
+        },
+        resolveEditObjectDictionaryIntent(state, result: IntentResult) {
+            if (state.editObjectDictionaryIntent) {
+                state.editObjectDictionaryIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on editObjectDictionaryIntent with empty intent")
+            }
+        },
+        clearEditObjectDictionaryIntent(state) {
+            state.editObjectDictionaryIntent = null;
+        },
         setNewHttpAPIIntent(state, intent: Intent<ApplicationPOTO>) {
             state.newHttpAPIIntent = intent;
         },
@@ -228,6 +244,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewObjectDictionaryIntent(context) {
             context.commit("clearNewObjectDictionaryIntent")
+        },
+        setEditObjectDictionaryIntent(context, intent: Intent<ObjectDictionaryPOTO>) {
+            context.commit("setEditObjectDictionaryIntent", intent)
+        },
+        resolveEditObjectDictionaryIntent(context, result: IntentResult) {
+            context.commit("resolveEditObjectDictionaryIntent", result);
+            context.commit("clearEditObjectDictionaryIntent");
+        },
+        clearEditObjectDictionaryIntent(context) {
+            context.commit("clearEditObjectDictionaryIntent")
         },
         setNewHttpAPIIntent(context, intent: Intent<ApplicationPOTO>) {
             context.commit("setNewHttpAPIIntent", intent)

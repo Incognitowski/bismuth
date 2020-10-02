@@ -81,7 +81,8 @@
         <v-row justify="center" v-if="isLoadingArtifacts">
           <v-progress-circular indeterminate/>
         </v-row>
-        <v-row justify="center" v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0 && loadedHttpAPIs.length === 0)">
+        <v-row justify="center"
+               v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0 && loadedHttpAPIs.length === 0)">
           <p class="font-weight-light text--secondary mt-5 ml-3">No artifact found of this type on this application.</p>
         </v-row>
 
@@ -99,6 +100,7 @@
             <v-list-item
                 v-for="objectDictionary in loadedObjectDictionaries"
                 :key="objectDictionary.objectDictionaryId"
+                @click="openObjectDictionary(objectDictionary)"
             >
               <v-list-item-content>
                 <v-list-item-title v-text="objectDictionary.name"></v-list-item-title>
@@ -252,6 +254,19 @@ export default class ApplicationScreen extends Vue {
         //todo ArtifactTypes.TEXT_DOCUMENT
         //todo ArtifactTypes.HTTP_API
     }
+  }
+
+  openObjectDictionary(objectDictionary: ObjectDictionaryPOTO) {
+    objectDictionary.application = <ApplicationPOTO>this.currentApplication;
+    const intent: Intent<ObjectDictionaryPOTO> = {
+      payload: objectDictionary,
+      action: IntentAction.EDIT_OBJECT_DICTIONARY_ARTIFACT,
+      callback: {
+        action: (result: IntentResult) => {
+        }
+      }
+    }
+    this.$store.dispatch("appIntents/setEditObjectDictionaryIntent", intent);
   }
 
   openObjectDictionaryArtifactCreator() {
