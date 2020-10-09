@@ -14,6 +14,20 @@
         <span>Return</span>
       </v-tooltip>
       <h3 class="font-weight-light">Create Entry</h3>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+              icon
+              :color="getColorForSaveButton()"
+              :disabled="hasClassInconsistencies()"
+              @click="createDictionaryEntry"
+              v-on="on"
+              v-bind="attrs">
+            <v-icon small>fas fa-check</v-icon>
+          </v-btn>
+        </template>
+        <span>{{ getSaveButtonTooltip() }}</span>
+      </v-tooltip>
     </v-row>
     <v-row class="mt-3 mb-5">
       <v-divider/>
@@ -38,6 +52,7 @@
           v-model="dictionaryEntry.description"
       ></v-textarea>
     </v-row>
+    <!--  CONSTRUCTORS  -->
     <v-row justify="space-between" align="baseline" class="mt-3">
       <h4 class="font-weight-light">Constructors</h4>
       <v-tooltip bottom>
@@ -65,10 +80,45 @@
             v-for="(constructor, i) in dictionaryEntryConstructors"
             :key="i"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-header disable-icon-rotate>
+            <span
+                :class="{ 'text-caption': getConstructorLabel(constructor).length > 70, 'text-body': getConstructorLabel(constructor).length < 70}">
             {{ getConstructorLabel(constructor) }}
+            </span>
+            <template v-slot:actions>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                      class="mr-3"
+                      icon
+                      @click="removeMethod(i)"
+                      v-on="on"
+                      v-bind="attrs">
+                    <v-icon small>fas fa-trash</v-icon>
+                  </v-btn>
+                </template>
+                <span>Remove Method</span>
+              </v-tooltip>
+              <v-icon>
+                $expand
+              </v-icon>
+            </template>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
+            <v-row class="mt-3">
+              <v-autocomplete
+                  label="Visibility"
+                  hide-details
+                  v-model="constructor.visibility"
+                  :items="[
+                      'Public',
+                      'Private',
+                      'Protected',
+                      ]"
+                  dense
+                  outlined
+              ></v-autocomplete>
+            </v-row>
             <v-row class="mt-3">
               <v-textarea
                   label="Constructor Description"
@@ -85,7 +135,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                       icon
-                      @click="addNewArgument(constructor)"
+                      @click="addNewArgumentToConstructor(constructor)"
                       v-on="on"
                       v-bind="attrs">
                     <v-icon x-small>fas fa-plus</v-icon>
@@ -155,6 +205,292 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-row>
+    <!--  METHODS  -->
+    <v-row justify="space-between" align="baseline" class="mt-3">
+      <h4 class="font-weight-light">Methods</h4>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+              icon
+              @click="addNewMethod"
+              v-on="on"
+              v-bind="attrs">
+            <v-icon small>fas fa-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Add Method</span>
+      </v-tooltip>
+    </v-row>
+    <v-row class="mt-0 mb-1">
+      <v-divider/>
+    </v-row>
+    <v-row>
+      <v-row class="mt-2" justify="center" v-if="dictionaryEntryMethods.length === 0">
+        <p class="text--secondary">No methods provided for this class</p>
+      </v-row>
+      <v-expansion-panels>
+        <v-expansion-panel
+            v-for="(method, i) in dictionaryEntryMethods"
+            :key="i"
+        >
+          <v-expansion-panel-header disable-icon-rotate>
+            <span
+                :class="{ 'text-caption': getMethodLabel(method).length > 70, 'text-body': getMethodLabel(method).length < 70}">
+              {{ getMethodLabel(method) }}
+            </span>
+            <template v-slot:actions>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                      class="mr-3"
+                      icon
+                      @click="removeMethod(i)"
+                      v-on="on"
+                      v-bind="attrs">
+                    <v-icon small>fas fa-trash</v-icon>
+                  </v-btn>
+                </template>
+                <span>Remove Method</span>
+              </v-tooltip>
+              <v-icon>
+                $expand
+              </v-icon>
+            </template>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-row class="mt-3">
+              <v-text-field
+                  label="Method name"
+                  persistent-hint
+                  hint="Give your method a nice name, something very descriptive."
+                  outlined
+                  dense
+                  v-model="method.name"
+              ></v-text-field>
+              <v-autocomplete
+                  label="Visibility"
+                  hide-details
+                  v-model="method.visibility"
+                  :items="[
+                      'Public',
+                      'Private',
+                      'Protected',
+                      ]"
+                  dense
+                  outlined
+                  class="ml-2"
+              ></v-autocomplete>
+            </v-row>
+            <v-row class="mt-3">
+              <v-textarea
+                  label="Method Description"
+                  auto-grow
+                  persistent-hint
+                  hint="Describe the purpose of this method"
+                  outlined
+                  v-model="method.description"
+              ></v-textarea>
+            </v-row>
+            <v-row align="center" class="mt-3">
+              <v-autocomplete
+                  label="Return type"
+                  hide-details
+                  v-model="method.returnType"
+                  :items="[
+                      'Void',
+                      'Integer',
+                      'Float',
+                      'String',
+                      'Boolean',
+                      ]"
+                  dense
+                  outlined
+                  class="ml-2"
+              ></v-autocomplete>
+              <v-checkbox class="mx-5" v-model="method.isStatic" label="Static"/>
+            </v-row>
+            <v-row class="mt-2" dense justify="space-between">
+              <h5 class="font-weight-light">Arguments</h5>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                      icon
+                      @click="addNewArgumentToMethod(method)"
+                      v-on="on"
+                      v-bind="attrs">
+                    <v-icon x-small>fas fa-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add Argument</span>
+              </v-tooltip>
+            </v-row>
+            <v-row class="text-caption text--secondary" justify="center" v-if="method.arguments.length === 0">
+              <p>No arguments provided for this method</p>
+            </v-row>
+            <v-container v-for="(argument, j) in method.arguments" :key="j">
+              <v-row align="baseline" justify="space-between">
+                <v-text-field
+                    label="Argument name"
+                    dense
+                    hide-details
+                    outlined
+                    class="ml-2"
+                    v-model="argument.label"
+                ></v-text-field>
+                <v-autocomplete
+                    label="Type"
+                    hide-details
+                    v-model="argument.type"
+                    :items="[
+                      'Integer',
+                      'Float',
+                      'String',
+                      'Boolean',
+                      ]"
+                    dense
+                    outlined
+                    class="ml-2"
+                ></v-autocomplete>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        class="ml-2"
+                        icon
+                        @click="removeMethodArgument(i, j)"
+                        v-on="on"
+                        v-bind="attrs">
+                      <v-icon x-small>fas fa-minus</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Remove argument</span>
+                </v-tooltip>
+              </v-row>
+              <v-row align="start" justify="space-around">
+                <v-checkbox
+                    v-model="argument.isArray"
+                    label="Array"
+                    dense
+                ></v-checkbox>
+                <v-checkbox
+                    v-model="argument.isNullable"
+                    label="Nullable"
+                    dense
+                ></v-checkbox>
+              </v-row>
+              <v-row>
+                <v-divider/>
+              </v-row>
+            </v-container>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-row>
+    <!-- PROPERTIES  -->
+    <v-row justify="space-between" align="baseline" class="mt-3">
+      <h4 class="font-weight-light">Properties</h4>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+              icon
+              @click="addNewProperty"
+              v-on="on"
+              v-bind="attrs">
+            <v-icon small>fas fa-plus</v-icon>
+          </v-btn>
+        </template>
+        <span>Add Property</span>
+      </v-tooltip>
+    </v-row>
+    <v-row class="mt-0 mb-1">
+      <v-divider/>
+    </v-row>
+    <v-row>
+      <v-row class="mt-2" justify="center" v-if="dictionaryEntryProperties.length === 0">
+        <p class="text--secondary">No properties provided for this class</p>
+      </v-row>
+      <v-expansion-panels>
+        <v-expansion-panel
+            v-for="(property, i) in dictionaryEntryProperties"
+            :key="i"
+        >
+          <v-expansion-panel-header disable-icon-rotate>
+            <span
+                :class="{ 'text-caption': getPropertyLabel(property).length > 70, 'text-body': getPropertyLabel(property).length < 70}">
+              {{ getPropertyLabel(property) }}
+            </span>
+            <template v-slot:actions>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                      class="mr-3"
+                      icon
+                      @click="removeProperty(i)"
+                      v-on="on"
+                      v-bind="attrs">
+                    <v-icon small>fas fa-trash</v-icon>
+                  </v-btn>
+                </template>
+                <span>Remove Property</span>
+              </v-tooltip>
+              <v-icon>
+                $expand
+              </v-icon>
+            </template>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-row class="mt-3">
+              <v-text-field
+                  label="Property name"
+                  outlined
+                  dense
+                  v-model="property.name"
+              ></v-text-field>
+              <v-autocomplete
+                  label="Visibility"
+                  hide-details
+                  v-model="property.visibility"
+                  :items="[
+                      'Public',
+                      'Private',
+                      'Protected',
+                      ]"
+                  dense
+                  outlined
+                  class="ml-2"
+              ></v-autocomplete>
+            </v-row>
+            <v-row>
+              <v-textarea
+                  label="Property Description"
+                  auto-grow
+                  persistent-hint
+                  hint="Describe the purpose of this property"
+                  outlined
+                  v-model="property.description"
+              ></v-textarea>
+            </v-row>
+            <v-row align="center" class="mt-3">
+              <v-autocomplete
+                  label="Type"
+                  hide-details
+                  v-model="property.type"
+                  :items="[
+                      'Integer',
+                      'Float',
+                      'String',
+                      'Boolean',
+                      ]"
+                  dense
+                  outlined
+                  class="ml-2"
+              ></v-autocomplete>
+              <v-checkbox class="mx-5" v-model="property.isStatic" label="Static"/>
+              <v-checkbox class="mx-5" v-model="property.isFinal" label="Final"/>
+            </v-row>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-row>
   </v-container>
 </template>
 
@@ -162,9 +498,12 @@
 import Vue from 'vue'
 import Component from "vue-class-component";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
-import OnDictionaryEntryCreatedCallbackInterface
-  from "@/domains/artifacts/objectDictionary/OnDictionaryEntryCreatedCallbackInterface";
 import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
+import ObjectDictionaryEntryCommons from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryCommons";
+import ClassConstructor from "@/domains/artifacts/objectDictionary/ClassConstructor";
+import ClassMethod from "@/domains/artifacts/objectDictionary/ClassMethod";
+import ClassProperty from "@/domains/artifacts/objectDictionary/ClassProperty";
+import PropertyType from "@/domains/artifacts/objectDictionary/PropertyType";
 
 const DictionaryEntryCreatorProps = Vue.extend({
   props: {
@@ -174,69 +513,102 @@ const DictionaryEntryCreatorProps = Vue.extend({
   }
 });
 
-class PropertyType {
-  public label: string = '';
-  public type: string = '';
-  public isArray: boolean = false;
-  public isNullable: boolean = false;
-}
-
-class ObjectConstructor {
-  public description: string = '';
-  public arguments: Array<PropertyType> = [];
-}
-
 @Component
 export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps {
 
   isBootstrapping: boolean = true;
 
   currentObjectDictionary: ObjectDictionaryPOTO | null = null;
-  onDictionaryCreatedCallback: OnDictionaryEntryCreatedCallbackInterface | null = null;
   dictionaryEntry: ObjectDictionaryEntryPOTO = new ObjectDictionaryEntryPOTO();
 
-  dictionaryEntryConstructors: Array<ObjectConstructor> = [];
+  dictionaryEntryConstructors: Array<ClassConstructor> = [];
+  dictionaryEntryMethods: Array<ClassMethod> = [];
+  dictionaryEntryProperties: Array<ClassProperty> = [];
 
   mounted() {
     this.currentObjectDictionary = this.objectDictionary;
-    this.onDictionaryCreatedCallback = this.onCreated;
     this.isBootstrapping = false;
   }
 
-  getConstructorLabel(constructor: ObjectConstructor) {
-    let label: string = this.dictionaryEntry.name + "(";
-    constructor.arguments.map((value, index) => {
-      label += value.label + " : ";
-      if (value.isNullable) {
-        label += " Nullable ";
-      }
-      if (value.isArray) {
-        label += "Array<" + value.type + ">"
-      } else {
-        label += value.type
-      }
-      if (index != constructor.arguments.length - 1) {
-        label += ", ";
-      }
-    })
-    label += ")";
-    return label;
+  getColorForSaveButton(): string {
+    if (this.dictionaryEntryIsInvalid()) return "red";
+    return "green"
+  }
+
+  hasClassInconsistencies(): boolean {
+    return this.dictionaryEntryIsInvalid();
+  }
+
+  createDictionaryEntry() {
+
+  }
+
+  getSaveButtonTooltip(): string {
+    if (this.dictionaryEntry.name.length == 0)
+      return "Please add a name to you entry";
+    return "Save"
+  }
+
+  dictionaryEntryIsInvalid(): boolean {
+    if (this.dictionaryEntry.name.length == 0)
+      return true;
+    return false;
+  }
+
+  getConstructorLabel(constructor: ClassConstructor) {
+    return ObjectDictionaryEntryCommons.getConstructorLabel(constructor, this.dictionaryEntry.name);
+  }
+
+  getMethodLabel(method: ClassMethod) {
+    return ObjectDictionaryEntryCommons.getMethodLabel(method);
+  }
+
+  getPropertyLabel(property: ClassProperty) {
+    return ObjectDictionaryEntryCommons.getPropertyLabel(property);
   }
 
   addNewConstructor() {
-    this.dictionaryEntryConstructors.push(new ObjectConstructor());
+    this.dictionaryEntryConstructors.push(new ClassConstructor());
   }
 
-  addNewArgument(constructor: ObjectConstructor) {
+  addNewMethod() {
+    this.dictionaryEntryMethods.push(new ClassMethod());
+  }
+
+  addNewProperty() {
+    this.dictionaryEntryProperties.push(new ClassProperty());
+  }
+
+  addNewArgumentToConstructor(constructor: ClassConstructor) {
     constructor.arguments.push(new PropertyType());
+  }
+
+  addNewArgumentToMethod(method: ClassMethod) {
+    method.arguments.push(new PropertyType());
   }
 
   removeConstructorArgument(constructorIndex: number, argumentIndex: number) {
     this.dictionaryEntryConstructors[constructorIndex].arguments.splice(argumentIndex, 1);
   }
 
+  removeMethod(methodIndex: number) {
+    this.dictionaryEntryMethods.splice(methodIndex, 1);
+  }
+
+  removeProperty(propertyIndex: number) {
+    this.dictionaryEntryProperties.splice(propertyIndex, 1);
+  }
+
+  removeConstructor(constructorIndex: number) {
+    this.dictionaryEntryConstructors.splice(constructorIndex, 1);
+  }
+
+  removeMethodArgument(methodIndex: number, argumentIndex: number) {
+    this.dictionaryEntryMethods[methodIndex].arguments.splice(argumentIndex, 1);
+  }
+
   closeCreator() {
-    this.stateReference = false;
+    this.$emit("close")
   }
 
 }

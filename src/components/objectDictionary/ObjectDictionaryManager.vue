@@ -62,8 +62,8 @@
         <v-row v-if="isCreatingEntry" justify="center">
           <DictionaryEntryCreator
               :object-dictionary="currentObjectDictionary"
-              v-bind:state-refence="isCreatingEntry"
-              :on-create="onDictionaryEntryCreated"
+              @close="closeDictionaryEntryCreator"
+              @onCreated="onDictionaryEntryCreated"
           />
         </v-row>
 
@@ -99,11 +99,6 @@ import ExceptionCommons from "@/domains/framework/ExceptionCommons";
 import {AxiosError, AxiosResponse} from "axios";
 import ApplicationAPI from "@/domains/application/ApplicationAPI";
 import DictionaryEntryCreator from "@/components/objectDictionary/DictionaryEntryCreator.vue";
-import OnDictionaryEntryCreatedCallbackInterface
-  from "@/domains/artifacts/objectDictionary/OnDictionaryEntryCreatedCallbackInterface";
-import DictionaryEntryCreatorCancellingStrategy
-  from "@/domains/artifacts/objectDictionary/DictionaryEntryCreatorCancellingStrategy";
-import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
 
 const ObjectDictionaryManagerProps = Vue.extend({
   props: {
@@ -139,17 +134,8 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   showSnackbar: boolean = false;
   snackbarText: string = '';
 
-  onDictionaryEntryCreated: OnDictionaryEntryCreatedCallbackInterface = {
-    onEntryCreated(entry: ObjectDictionaryEntryPOTO) {
-      console.log("YEET");
-    }
-  }
-
-  dictionaryCreationCloseFunction: DictionaryEntryCreatorCancellingStrategy = {
-    action: () => {
-      console.log(this);
-      this.isCreatingEntry = false;
-    }
+  onDictionaryEntryCreated() {
+    console.log("YEET")
   }
 
   navigationItems: Array<NavigationItem> = [
@@ -184,7 +170,7 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
     }
   }
 
-  closeDictionaryCreator(){
+  closeDictionaryEntryCreator() {
     this.isCreatingEntry = false;
   }
 
