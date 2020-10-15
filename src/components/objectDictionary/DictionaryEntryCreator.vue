@@ -504,6 +504,9 @@ import ClassConstructor from "@/domains/artifacts/objectDictionary/ClassConstruc
 import ClassMethod from "@/domains/artifacts/objectDictionary/ClassMethod";
 import ClassProperty from "@/domains/artifacts/objectDictionary/ClassProperty";
 import PropertyType from "@/domains/artifacts/objectDictionary/PropertyType";
+import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDictionaryAPI";
+import {AxiosError, AxiosResponse} from "axios";
+import ExceptionCommons from "@/domains/framework/ExceptionCommons";
 
 const DictionaryEntryCreatorProps = Vue.extend({
   props: {
@@ -516,6 +519,9 @@ const DictionaryEntryCreatorProps = Vue.extend({
 @Component
 export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps {
 
+  isLoading: boolean = false;
+  hasErrors: boolean = false;
+  errorMessage: string = "";
   isBootstrapping: boolean = true;
 
   currentObjectDictionary: ObjectDictionaryPOTO | null = null;
@@ -540,7 +546,33 @@ export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps 
   }
 
   createDictionaryEntry() {
+    this.isLoading = true;
+    this.hasErrors = false;
+    const objectDictionaryEntry: ObjectDictionaryEntryPOTO = this.buildObjectDictionaryEntry();
+    new ObjectDictionaryAPI().createObjectDictionaryEntry(
+        <string>this.$route.params.projectId,
+        <string>this.$route.params.applicationId,
+        <string>this.currentObjectDictionary?.objectDictionaryId,
+        objectDictionaryEntry
+    ).then((response: AxiosResponse<ObjectDictionaryEntryPOTO>) => {
+      this.$emit("onCreated");
+    }).catch((error: AxiosError) => {
+      this.hasErrors = true;
+      this.errorMessage = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoading = false;
+    });
+  }
 
+  private buildObjectDictionaryEntry(): ObjectDictionaryEntryPOTO {
+    let objectDictionaryEntry = this.dictionaryEntry;
+    objectDictionaryEntry.structure = JSON.stringify({
+      entryConstructors: this.dictionaryEntryConstructors,
+      entryMethods: this.dictionaryEntryMethods,
+      entryProperties: this.dictionaryEntryProperties,
+    });
+    objectDictionaryEntry.objectDictionaryId = <string>this.currentObjectDictionary?.objectDictionaryId;
+    return objectDictionaryEntry;
   }
 
   getSaveButtonTooltip(): string {
@@ -610,7 +642,6 @@ export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps 
   closeCreator() {
     this.$emit("close")
   }
-
 }
 
 </script>

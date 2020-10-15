@@ -56,7 +56,7 @@
         </v-row>
 
         <v-row v-if="!isLoadingEntries && !isCreatingEntry" justify="center">
-          <v-progress-circular indeterminate/>
+
         </v-row>
 
         <v-row v-if="isCreatingEntry" justify="center">
@@ -99,6 +99,7 @@ import ExceptionCommons from "@/domains/framework/ExceptionCommons";
 import {AxiosError, AxiosResponse} from "axios";
 import ApplicationAPI from "@/domains/application/ApplicationAPI";
 import DictionaryEntryCreator from "@/components/objectDictionary/DictionaryEntryCreator.vue";
+import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
 
 const ObjectDictionaryManagerProps = Vue.extend({
   props: {
@@ -129,14 +130,12 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   isInSettings: boolean = false;
   isInHelp: boolean = false;
   isLoadingEntries: boolean = false;
+  hasEntriesLoadingError: boolean = false;
+  entriesLoadingErrorMessage: string = "";
   isCreatingEntry: boolean = false;
 
   showSnackbar: boolean = false;
   snackbarText: string = '';
-
-  onDictionaryEntryCreated() {
-    console.log("YEET")
-  }
 
   navigationItems: Array<NavigationItem> = [
     {
@@ -155,11 +154,14 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
       type: NavigationType.HELP
     },
   ];
-  selectedNavigationItem: NavigationItem = this.navigationItems[0];
 
+  selectedNavigationItem: NavigationItem = this.navigationItems[0];
   currentProject: ProjectPOTO | null = null;
+
   currentApplication: ApplicationPOTO | null = null;
   currentObjectDictionary: ObjectDictionaryPOTO | null = null;
+
+  loadedEntries: Array<ObjectDictionaryEntryPOTO> = new Array<ObjectDictionaryEntryPOTO>();
 
   mounted() {
     if (this.$store.state.project.selectedProject != null) {
@@ -168,6 +170,11 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
     } else {
       this.searchForProject();
     }
+  }
+
+  onDictionaryEntryCreated() {
+    this.closeDictionaryEntryCreator();
+    this.searchForEntries();
   }
 
   closeDictionaryEntryCreator() {
@@ -228,16 +235,17 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   }
 
   private searchForApplication() {
-    new ApplicationAPI().getApplication(this.$route.params.projectId, this.$route.params.applicationId)
-        .then((response: AxiosResponse<ApplicationPOTO>) => {
-          this.currentApplication = response.data;
-          this.$store.dispatch("application/setSelectedApplication", this.currentApplication);
-          this.searchForObjectDictionary();
-        })
-        .catch((error: AxiosError) => {
-          this.snackbarText = ExceptionCommons.parseErrorMessage(error);
-          this.showSnackbar = true;
-        });
+    new ApplicationAPI().getApplication(
+        this.$route.params.projectId,
+        this.$route.params.applicationId
+    ).then((response: AxiosResponse<ApplicationPOTO>) => {
+      this.currentApplication = response.data;
+      this.$store.dispatch("application/setSelectedApplication", this.currentApplication);
+      this.searchForObjectDictionary();
+    }).catch((error: AxiosError) => {
+      this.snackbarText = ExceptionCommons.parseErrorMessage(error);
+      this.showSnackbar = true;
+    });
   }
 
   private searchForObjectDictionary() {
@@ -245,15 +253,31 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
         this.$route.params.projectId,
         this.$route.params.applicationId,
         this.objectDictionaryId
-    )
-        .then((response: AxiosResponse<ObjectDictionaryPOTO>) => {
-          this.currentObjectDictionary = response.data;
-          this.isLoading = false;
-        })
-        .catch((error: AxiosError) => {
-          this.snackbarText = ExceptionCommons.parseErrorMessage(error);
-          this.showSnackbar = true;
-        })
+    ).then((response: AxiosResponse<ObjectDictionaryPOTO>) => {
+      this.currentObjectDictionary = response.data;
+      this.isLoading = false;
+      this.isLoadingEntries = true;
+      this.searchForEntries();
+    }).catch((error: AxiosError) => {
+      this.snackbarText = ExceptionCommons.parseErrorMessage(error);
+      this.showSnackbar = true;
+    })
+  }
+
+  private searchForEntries() {
+    this.isLoadingEntries = true;
+    new ObjectDictionaryAPI().searchForEntries(
+        this.$route.params.projectId,
+        this.$route.params.applicationId,
+        this.objectDictionaryId
+    ).then((response: AxiosResponse<Array<ObjectDictionaryEntryPOTO>>) => {
+      this.loadedEntries = response.data;
+    }).catch((error: AxiosError) => {
+      this.hasEntriesLoadingError = true;
+      this.entriesLoadingErrorMessage = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoadingEntries = false;
+    });
   }
 }
 

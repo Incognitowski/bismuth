@@ -1,5 +1,6 @@
 import ObjectDictionaryREST from "@/domains/artifacts/objectDictionary/ObjectDictionaryREST";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
+import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
 
 export default class ObjectDictionaryAPI {
 
@@ -32,4 +33,20 @@ export default class ObjectDictionaryAPI {
         return await this.objectDictionaryREST.getObjectDictionary(projectId, applicationId, objectDictionaryId);
     }
 
+    public async createObjectDictionaryEntry(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        objectDictionaryEntry: ObjectDictionaryEntryPOTO
+    ) {
+        return await this.objectDictionaryREST.createEntry(projectId, applicationId, objectDictionaryId, objectDictionaryEntry);
+    }
+
+    public async searchForEntries(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string
+    ) {
+        return await this.objectDictionaryREST.searchForEntries(projectId, applicationId, objectDictionaryId);
+    }
 }
