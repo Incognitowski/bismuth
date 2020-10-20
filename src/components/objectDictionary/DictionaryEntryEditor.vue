@@ -20,7 +20,7 @@
               icon
               :color="getColorForSaveButton()"
               :disabled="hasClassInconsistencies()"
-              @click="createDictionaryEntry"
+              @click="updateDictionaryEntry"
               v-on="on"
               v-bind="attrs">
             <v-icon small>fas fa-check</v-icon>
@@ -508,21 +508,20 @@ import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDict
 import {AxiosError, AxiosResponse} from "axios";
 import ExceptionCommons from "@/domains/framework/ExceptionCommons";
 
-const DictionaryEntryCreatorProps = Vue.extend({
+const DictionaryEntryEditorProps = Vue.extend({
   props: {
-    objectDictionary: Object,
+    objectDictionaryEntry: Object,
   }
 });
 
 @Component
-export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps {
+export default class DictionaryEntryEditor extends DictionaryEntryEditorProps {
 
   isLoading: boolean = false;
   hasErrors: boolean = false;
   errorMessage: string = "";
   isBootstrapping: boolean = true;
 
-  currentObjectDictionary: ObjectDictionaryPOTO | null = null;
   dictionaryEntry: ObjectDictionaryEntryPOTO = new ObjectDictionaryEntryPOTO();
 
   dictionaryEntryConstructors: Array<ClassConstructor> = [];
@@ -530,7 +529,9 @@ export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps 
   dictionaryEntryProperties: Array<ClassProperty> = [];
 
   mounted() {
-    this.currentObjectDictionary = this.objectDictionary;
+    this.dictionaryEntry = this.objectDictionaryEntry;
+    console.log(this.dictionaryEntry);
+    // todo ver o que vai entrar em dictionaryEntry.structure, provavelmente uma string.
     this.isBootstrapping = false;
   }
 
@@ -543,23 +544,10 @@ export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps 
     return this.dictionaryEntryIsInvalid();
   }
 
-  createDictionaryEntry() {
+  updateDictionaryEntry() {
     this.isLoading = true;
     this.hasErrors = false;
     const objectDictionaryEntry: ObjectDictionaryEntryPOTO = this.buildObjectDictionaryEntry();
-    new ObjectDictionaryAPI().createObjectDictionaryEntry(
-        <string>this.$route.params.projectId,
-        <string>this.$route.params.applicationId,
-        <string>this.currentObjectDictionary?.objectDictionaryId,
-        objectDictionaryEntry
-    ).then((response: AxiosResponse<ObjectDictionaryEntryPOTO>) => {
-      this.$emit("onCreated");
-    }).catch((error: AxiosError) => {
-      this.hasErrors = true;
-      this.errorMessage = ExceptionCommons.parseErrorMessage(error);
-    }).finally(() => {
-      this.isLoading = false;
-    });
   }
 
   private buildObjectDictionaryEntry(): ObjectDictionaryEntryPOTO {
@@ -569,7 +557,7 @@ export default class DictionaryEntryCreator extends DictionaryEntryCreatorProps 
       entryMethods: this.dictionaryEntryMethods,
       entryProperties: this.dictionaryEntryProperties,
     });
-    objectDictionaryEntry.objectDictionaryId = <string>this.currentObjectDictionary?.objectDictionaryId;
+    objectDictionaryEntry.objectDictionaryId = <string>this.dictionaryEntry.objectDictionaryId;
     return objectDictionaryEntry;
   }
 

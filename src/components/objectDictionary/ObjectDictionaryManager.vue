@@ -25,7 +25,21 @@
       <v-container class="px-5">
         <v-row justify="start" align="baseline">
           <h2 class="font-weight-light">Entries</h2>
-          <h4 class="font-weight-light text--secondary ml-2">Showing n of x</h4>
+          <v-tooltip right v-if="currentObjectDictionary.isPubliclyVisible">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                  class="ml-3"
+                  rounded
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="copyPublicUrlToClipboard"
+              >
+                <v-icon small>fa fa-copy</v-icon>
+              </v-btn>
+            </template>
+            <span>Copy public URL</span>
+          </v-tooltip>
           <v-spacer/>
           <v-text-field
               label="Search Entries"
@@ -50,13 +64,23 @@
             <span>New Entry</span>
           </v-tooltip>
         </v-row>
-
-        <v-row v-if="isLoadingEntries && !isCreatingEntry" justify="center">
+        <v-row v-if="isLoadingEntries && !isCreatingEntry && !isEditingEntry" justify="center">
           <v-progress-circular indeterminate/>
         </v-row>
+        <v-row v-if="!isLoadingEntries && !isCreatingEntry && !isEditingEntry && loadedEntries.length === 0"
+               justify="center">
+          There are no entries on this dictionary yet. Click the plus sign on the upper-right corner to add a new entry.
+        </v-row>
 
-        <v-row v-if="!isLoadingEntries && !isCreatingEntry" justify="center">
-
+        <v-row v-if="!isLoadingEntries && !isCreatingEntry && !isEditingEntry && loadedEntries.length > 0"
+               justify="start" dense>
+          <DictionaryEntryListItem
+              v-for="entry in loadedEntries"
+              :key="entry.objectDictionaryEntryId"
+              :object-dictionary-entry="entry"
+              :is-loading="isLoading"
+              @callEditor="editEntry"
+          />
         </v-row>
 
         <v-row v-if="isCreatingEntry" justify="center">
@@ -64,6 +88,14 @@
               :object-dictionary="currentObjectDictionary"
               @close="closeDictionaryEntryCreator"
               @onCreated="onDictionaryEntryCreated"
+          />
+        </v-row>
+
+        <v-row v-if="isEditingEntry" justify="center">
+          <DictionaryEntryEditor
+              :object-dictionary-entry="entryToEdit"
+              @close="closeDictionaryEntryEditor"
+              @onEdited="onDictionaryEntryEdited"
           />
         </v-row>
 
@@ -100,6 +132,8 @@ import {AxiosError, AxiosResponse} from "axios";
 import ApplicationAPI from "@/domains/application/ApplicationAPI";
 import DictionaryEntryCreator from "@/components/objectDictionary/DictionaryEntryCreator.vue";
 import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
+import DictionaryEntryEditor from "@/components/objectDictionary/DictionaryEntryEditor.vue";
+import DictionaryEntryListItem from "@/components/objectDictionary/DictionaryEntryListItem.vue";
 
 const ObjectDictionaryManagerProps = Vue.extend({
   props: {
@@ -121,7 +155,10 @@ interface NavigationItem {
 }
 
 @Component({
-  components: {DictionaryEntryCreator, ObjectDictionaryCreator, ObjectDictionaryHelp}
+  components: {
+    DictionaryEntryListItem,
+    DictionaryEntryEditor, DictionaryEntryCreator, ObjectDictionaryCreator, ObjectDictionaryHelp
+  }
 })
 export default class ObjectDictionaryManager extends ObjectDictionaryManagerProps {
 
@@ -133,6 +170,9 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   hasEntriesLoadingError: boolean = false;
   entriesLoadingErrorMessage: string = "";
   isCreatingEntry: boolean = false;
+  isEditingEntry: boolean = false;
+
+  entryToEdit: ObjectDictionaryEntryPOTO = new ObjectDictionaryEntryPOTO();
 
   showSnackbar: boolean = false;
   snackbarText: string = '';
@@ -279,6 +319,28 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
       this.isLoadingEntries = false;
     });
   }
+
+  private editEntry(entry: ObjectDictionaryEntryPOTO) {
+    this.isEditingEntry = true;
+    entry.objectDictionary = <ObjectDictionaryPOTO>this.currentObjectDictionary;
+    this.entryToEdit = entry;
+  }
+
+  private copyPublicUrlToClipboard() {
+    const dictionaryEntryPublicUrl = `${location.host}/#/public/project/${this.$route.params.projectId}/application/${this.$route.params.applicationId}/dictionary/${<string>this.currentObjectDictionary?.objectDictionaryId}`;
+    navigator.clipboard.writeText(dictionaryEntryPublicUrl);
+    this.snackbarText = "✨ Object Dictionary URL copied to your clipboard ✨";
+    this.showSnackbar = true;
+  }
+
+  private closeDictionaryEntryEditor() {
+    this.isEditingEntry = false;
+  }
+
+  private onDictionaryEntryEdited() {
+    this.closeDictionaryEntryEditor();
+  }
+
 }
 
 </script>
