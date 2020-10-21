@@ -77,7 +77,19 @@ export default class App extends Vue {
 }
 </script>
 
-<style scoped>
+<style>
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #292929;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #54545400;
+}
 
 .main-container-height-fix {
   height: calc(100vh - 48px);
