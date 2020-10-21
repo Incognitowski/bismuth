@@ -114,6 +114,7 @@ import ClassConstructor from "@/domains/artifacts/objectDictionary/ClassConstruc
 import ClassMethod from "@/domains/artifacts/objectDictionary/ClassMethod";
 import ClassProperty from "@/domains/artifacts/objectDictionary/ClassProperty";
 import ObjectDictionaryEntryCommons from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryCommons";
+import ClassStructure from "@/domains/artifacts/objectDictionary/ClassStructure";
 
 const DictionaryEntryListItemProps = Vue.extend({
   props: {
@@ -136,12 +137,6 @@ class MenuItem {
   label: string = "";
   icon: string = "";
   item: MenuItemEnum = MenuItemEnum.DESCRIPTION;
-}
-
-class ClassStructure {
-  entryConstructors: Array<ClassConstructor> = new Array<ClassConstructor>();
-  entryMethods: Array<ClassMethod> = new Array<ClassMethod>();
-  entryProperties: Array<ClassProperty> = new Array<ClassProperty>();
 }
 
 @Component
@@ -206,34 +201,6 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
       ]
     }
   }
-
-  // menuItems: Array<MenuItem> = [
-  //   {
-  //     label: "Description",
-  //     icon: "fas fa-info",
-  //     item: MenuItemEnum.DESCRIPTION
-  //   },
-  //   {
-  //     label: "JSON",
-  //     icon: "fas fa-file-code",
-  //     item: MenuItemEnum.JSON
-  //   },
-  //   {
-  //     label: "Constructors",
-  //     icon: "fas fa-drafting-compass",
-  //     item: MenuItemEnum.CONSTRUCTORS
-  //   },
-  //   {
-  //     label: "Properties",
-  //     icon: "fas fa-stream",
-  //     item: MenuItemEnum.PROPERTIES
-  //   },
-  //   {
-  //     label: "Methods",
-  //     icon: "fas fa-terminal",
-  //     item: MenuItemEnum.METHODS
-  //   },
-  // ];
 
   selectedMenuItemIndex: number = 0;
   selectedMenuItem: MenuItem = this.menuItems[0];

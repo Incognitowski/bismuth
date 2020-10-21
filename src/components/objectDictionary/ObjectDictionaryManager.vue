@@ -25,6 +25,9 @@
       <v-container class="px-5">
         <v-row justify="start" align="baseline">
           <h2 class="font-weight-light">Entries</h2>
+          <h4 class="font-weight-thin ml-3" v-if="entrySearchWord.trim().length > 0">
+            with search word "{{ entrySearchWord.trim() }}"
+          </h4>
           <v-tooltip right v-if="currentObjectDictionary.isPubliclyVisible">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
@@ -46,6 +49,7 @@
               dense
               style="max-width: 200px"
               outlined
+              v-model="entrySearchWord"
           ></v-text-field>
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
@@ -172,6 +176,8 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   isCreatingEntry: boolean = false;
   isEditingEntry: boolean = false;
 
+  entrySearchWord: string = "";
+
   entryToEdit: ObjectDictionaryEntryPOTO = new ObjectDictionaryEntryPOTO();
 
   showSnackbar: boolean = false;
@@ -227,6 +233,18 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
 
   get selectedNavigationItemGetter() {
     return this.selectedNavigationItem;
+  }
+
+  entrySearchTimeout: number | null = null;
+
+  @Watch("entrySearchWord")
+  onEntrySearchWordChange(newSearchWord: string, oldSearchWord: string) {
+    if (newSearchWord.trim() == oldSearchWord.trim()) return;
+    if (this.entrySearchTimeout)
+      clearTimeout(this.entrySearchTimeout);
+    this.entrySearchTimeout = setTimeout(() => {
+      this.searchForEntries()
+    }, 500);
   }
 
   @Watch("selectedNavigationItemGetter")
@@ -304,7 +322,28 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
     })
   }
 
+  private searchForEntriesWithSearchWord() {
+    this.isLoadingEntries = true;
+    new ObjectDictionaryAPI().searchForEntriesWithSearchWord(
+        this.$route.params.projectId,
+        this.$route.params.applicationId,
+        this.objectDictionaryId,
+        this.entrySearchWord
+    ).then((response: AxiosResponse<Array<ObjectDictionaryEntryPOTO>>) => {
+      this.loadedEntries = response.data;
+    }).catch((error: AxiosError) => {
+      this.hasEntriesLoadingError = true;
+      this.entriesLoadingErrorMessage = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoadingEntries = false;
+    });
+  }
+
   private searchForEntries() {
+    if (this.entrySearchWord.trim().length > 0) {
+      this.searchForEntriesWithSearchWord();
+      return;
+    }
     this.isLoadingEntries = true;
     new ObjectDictionaryAPI().searchForEntries(
         this.$route.params.projectId,

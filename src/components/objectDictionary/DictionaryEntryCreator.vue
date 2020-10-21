@@ -32,6 +32,16 @@
     <v-row class="mt-3 mb-5">
       <v-divider/>
     </v-row>
+    <v-alert
+        color="red"
+        dense
+        v-model="hasErrors"
+        outlined
+        text
+        dismissible
+        type="warning"
+    >{{ errorMessage }}
+    </v-alert>
     <v-row>
       <v-text-field
           label="Entry Name"

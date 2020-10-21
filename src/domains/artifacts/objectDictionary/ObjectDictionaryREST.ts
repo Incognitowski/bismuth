@@ -16,7 +16,7 @@ export default class ObjectDictionaryREST {
         applicationId: string,
     ): Promise<AxiosResponse<Array<ObjectDictionaryPOTO>>> {
         return this.httpProvider.authInstance.get(
-            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary"
+            `/project/${projectId}/application/${applicationId}/object-dictionary`
         );
     }
 
@@ -26,14 +26,14 @@ export default class ObjectDictionaryREST {
         objectDictionary: ObjectDictionaryPOTO
     ): Promise<AxiosResponse<ObjectDictionaryPOTO>> {
         return this.httpProvider.authInstance.post(
-            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary",
+            `/project/${projectId}/application/${applicationId}/object-dictionary`,
             objectDictionary
         );
     }
 
     async getObjectDictionary(projectId: string, applicationId: string, objectDictionaryId: string) {
         return this.httpProvider.authInstance.get(
-            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary/" + objectDictionaryId
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}`
         );
     }
 
@@ -44,7 +44,7 @@ export default class ObjectDictionaryREST {
         objectDictionaryEntry: ObjectDictionaryEntryPOTO
     ): Promise<AxiosResponse<ObjectDictionaryEntryPOTO>> {
         return this.httpProvider.authInstance.post(
-            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary/" + objectDictionaryId + "/entry",
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/entry`,
             objectDictionaryEntry
         );
     }
@@ -53,9 +53,32 @@ export default class ObjectDictionaryREST {
         projectId: string,
         applicationId: string,
         objectDictionaryId: string
-    ) : Promise<AxiosResponse<Array<ObjectDictionaryEntryPOTO>>> {
+    ): Promise<AxiosResponse<Array<ObjectDictionaryEntryPOTO>>> {
         return this.httpProvider.authInstance.get(
-            "/project/" + projectId + "/application/" + applicationId + "/object-dictionary/" + objectDictionaryId + "/entry"
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/entry`
+        );
+    }
+
+    async searchForEntriesWithSearchWord(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        entrySearchWord: string
+    ): Promise<AxiosResponse<Array<ObjectDictionaryEntryPOTO>>> {
+        return this.httpProvider.authInstance.get(
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/entry/search-by-word/${encodeURIComponent(entrySearchWord)}`
+        );
+    }
+
+    async updateObjectDictionaryEntry(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        objectDictionaryEntry: ObjectDictionaryEntryPOTO
+    ): Promise<AxiosResponse<ObjectDictionaryEntryPOTO>> {
+        return this.httpProvider.authInstance.put(
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/entry/${objectDictionaryEntry.objectDictionaryEntryId}`,
+            objectDictionaryEntry
         );
     }
 }

@@ -49,4 +49,27 @@ export default class ObjectDictionaryAPI {
     ) {
         return await this.objectDictionaryREST.searchForEntries(projectId, applicationId, objectDictionaryId);
     }
+
+    public async searchForEntriesWithSearchWord(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        entrySearchWord: string
+    ) {
+        return await this.objectDictionaryREST.searchForEntriesWithSearchWord(projectId, applicationId, objectDictionaryId, entrySearchWord);
+    }
+
+    public async updateObjectDictionaryEntry(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        objectDictionaryEntry: ObjectDictionaryEntryPOTO
+    ) {
+        return await this.objectDictionaryREST.updateObjectDictionaryEntry(
+            projectId,
+            applicationId,
+            objectDictionaryId,
+            objectDictionaryEntry
+        )
+    }
 }

@@ -13,7 +13,7 @@
         </template>
         <span>Return</span>
       </v-tooltip>
-      <h3 class="font-weight-light">Create Entry</h3>
+      <h3 class="font-weight-light">Edit Entry</h3>
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
@@ -32,6 +32,16 @@
     <v-row class="mt-3 mb-5">
       <v-divider/>
     </v-row>
+    <v-alert
+        color="red"
+        dense
+        v-model="hasErrors"
+        outlined
+        text
+        dismissible
+        type="warning"
+    >{{ errorMessage }}
+    </v-alert>
     <v-row>
       <v-text-field
           label="Entry Name"
@@ -507,6 +517,9 @@ import PropertyType from "@/domains/artifacts/objectDictionary/PropertyType";
 import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDictionaryAPI";
 import {AxiosError, AxiosResponse} from "axios";
 import ExceptionCommons from "@/domains/framework/ExceptionCommons";
+import ClassStructure from "@/domains/artifacts/objectDictionary/ClassStructure";
+import {IntentResult} from "@/store/modules/Intents";
+import DefaultHTTPException from "@/domains/framework/DefaultHTTPException";
 
 const DictionaryEntryEditorProps = Vue.extend({
   props: {
@@ -531,7 +544,10 @@ export default class DictionaryEntryEditor extends DictionaryEntryEditorProps {
   mounted() {
     this.dictionaryEntry = this.objectDictionaryEntry;
     console.log(this.dictionaryEntry);
-    // todo ver o que vai entrar em dictionaryEntry.structure, provavelmente uma string.
+    const structure: ClassStructure = <ClassStructure>JSON.parse(this.dictionaryEntry.structure);
+    this.dictionaryEntryConstructors = structure.entryConstructors;
+    this.dictionaryEntryMethods = structure.entryMethods;
+    this.dictionaryEntryProperties = structure.entryProperties;
     this.isBootstrapping = false;
   }
 
@@ -548,6 +564,19 @@ export default class DictionaryEntryEditor extends DictionaryEntryEditorProps {
     this.isLoading = true;
     this.hasErrors = false;
     const objectDictionaryEntry: ObjectDictionaryEntryPOTO = this.buildObjectDictionaryEntry();
+    new ObjectDictionaryAPI().updateObjectDictionaryEntry(
+        <string>this.$route.params.projectId,
+        <string>this.$route.params.applicationId,
+        <string>this.dictionaryEntry?.objectDictionaryId,
+        objectDictionaryEntry
+    ).then((response: AxiosResponse<ObjectDictionaryEntryPOTO>) => {
+      this.$emit("onEdited");
+    }).catch((error: AxiosError) => {
+      this.hasErrors = true;
+      this.errorMessage = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoading = false;
+    });
   }
 
   private buildObjectDictionaryEntry(): ObjectDictionaryEntryPOTO {
