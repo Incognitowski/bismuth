@@ -72,4 +72,30 @@ export default class ObjectDictionaryAPI {
             objectDictionaryEntry
         )
     }
+
+    public async deleteEntry(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        objectDictionaryEntryId: string
+    ) {
+        return await this.objectDictionaryREST.deleteEntry(
+            projectId,
+            applicationId,
+            objectDictionaryId,
+            objectDictionaryEntryId
+        );
+    }
+
+    public async getObjectDictionaryPublicly(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string
+    ) {
+        return await this.objectDictionaryREST.getObjectDictionaryPublicly(
+            projectId,
+            applicationId,
+            objectDictionaryId
+        );
+    }
 }

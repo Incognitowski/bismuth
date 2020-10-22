@@ -3,7 +3,22 @@
     <v-card-title>
       {{ entry.name }}
       <v-spacer></v-spacer>
-      <v-tooltip bottom>
+      <v-tooltip bottom v-if="!isReadOnly">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+              rounded
+              icon
+              v-bind="attrs"
+              v-on="on"
+              :disabled="isParentLoading"
+              @click="invokeDeletion"
+          >
+            <v-icon small>fas fa-trash-alt</v-icon>
+          </v-btn>
+        </template>
+        <span>Delete Entry</span>
+      </v-tooltip>
+      <v-tooltip bottom v-if="!isReadOnly">
         <template v-slot:activator="{ on, attrs }">
           <v-btn
               rounded
@@ -102,6 +117,39 @@
         </v-col>
       </v-row>
     </v-card-text>
+    <v-dialog
+        v-model="isDeleting"
+        width="500"
+        overlay-color="black"
+    >
+      <v-card :loading="isSendingDeleteRequest">
+        <v-card-title class="headline">
+          Delete Object Dictionary Entry
+        </v-card-title>
+        <v-card-text>
+          Would you like to delete the <b>{{ entry.name }}</b> dictionary entry? This action is irreversible and will
+          show up on the events tab of this object dictionary.
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+              color="green"
+              text
+              @click="deleteEntry"
+          >
+            DELETE ENTRY
+          </v-btn>
+          <v-btn
+              color="red"
+              text
+              @click="isDeleting = false"
+          >
+            CANCEL
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -115,6 +163,8 @@ import ClassMethod from "@/domains/artifacts/objectDictionary/ClassMethod";
 import ClassProperty from "@/domains/artifacts/objectDictionary/ClassProperty";
 import ObjectDictionaryEntryCommons from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryCommons";
 import ClassStructure from "@/domains/artifacts/objectDictionary/ClassStructure";
+import ObjectDictionaryAPI from "@/domains/artifacts/objectDictionary/ObjectDictionaryAPI";
+import {AxiosError, AxiosResponse} from "axios";
 
 const DictionaryEntryListItemProps = Vue.extend({
   props: {
@@ -202,6 +252,9 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
     }
   }
 
+  isDeleting: boolean = false;
+  isSendingDeleteRequest: boolean = false;
+
   selectedMenuItemIndex: number = 0;
   selectedMenuItem: MenuItem = this.menuItems[0];
 
@@ -237,6 +290,26 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
     return ObjectDictionaryEntryCommons.getPropertyLabel(classProp);
   }
 
+  private deleteEntry() {
+    this.isSendingDeleteRequest = true;
+    new ObjectDictionaryAPI().deleteEntry(
+        <string>this.$route.params.projectId,
+        <string>this.$route.params.applicationId,
+        <string>this.entry?.objectDictionaryId,
+        this.entry.objectDictionaryEntryId
+    ).then((response: AxiosResponse) => {
+      this.isDeleting = false;
+      this.$emit("onDeleted");
+    }).catch((error: AxiosError) => {
+    }).finally(() => {
+      this.isSendingDeleteRequest = false;
+    })
+  }
+
+  private invokeDeletion() {
+    this.isDeleting = true;
+  }
+
   private invokeEditor() {
     this.$emit("callEditor", this.objectDictionaryEntry);
   }
@@ -267,6 +340,10 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
 
   get menuStateIsMethods(): boolean {
     return this.selectedMenuItem.item == MenuItemEnum.METHODS;
+  }
+
+  get isReadOnly() : boolean {
+    return this.readOnly;
   }
 
   @Watch("selectedMenuItemIndex")

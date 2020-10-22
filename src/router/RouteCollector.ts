@@ -5,6 +5,7 @@ import DashboardRoute from "@/router/Routes/DashboardRoute";
 import ProjectsRoute from "@/router/Routes/ProjectsRoute";
 import ProjectRoute from "@/router/Routes/ProjectRoute";
 import ApplicationRoute from "@/router/Routes/ApplicationRoute";
+import ObjectDictionaryPublicRoute from "@/router/Routes/ObjectDictionaryPublicRoute";
 
 export default class RouteCollector {
     static routes(): Array<RouteConfig> {
@@ -14,7 +15,8 @@ export default class RouteCollector {
             DashboardRoute.route(),
             ProjectsRoute.route(),
             ProjectRoute.route(),
-            ApplicationRoute.route()
+            ApplicationRoute.route(),
+            ObjectDictionaryPublicRoute.route()
         ];
     }
 }

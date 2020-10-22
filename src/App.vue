@@ -22,7 +22,6 @@ import BismuthRightToolbar from "@/components/BismuthRightToolbar.vue";
 import ActionHolder from "@/components/ActionHolder.vue";
 import AuthenticationAPI from "@/domains/authentication/AuthenticationAPI";
 
-import {Intent, IntentAction, IntentCallbackInterface, IntentResult} from '@/store/modules/Intents';
 import {AxiosError, AxiosResponse} from "axios";
 
 @Component({

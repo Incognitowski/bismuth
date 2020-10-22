@@ -81,4 +81,25 @@ export default class ObjectDictionaryREST {
             objectDictionaryEntry
         );
     }
+
+    async deleteEntry(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string,
+        objectDictionaryEntryId: string
+    ): Promise<AxiosResponse> {
+        return this.httpProvider.authInstance.delete(
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/entry/${objectDictionaryEntryId}`
+        );
+    }
+
+    async getObjectDictionaryPublicly(
+        projectId: string,
+        applicationId: string,
+        objectDictionaryId: string
+    ): Promise<ObjectDictionaryPOTO> {
+        return this.httpProvider.guestInstance.get(
+            `/project/${projectId}/application/${applicationId}/object-dictionary/${objectDictionaryId}/publicly`
+        );
+    }
 }

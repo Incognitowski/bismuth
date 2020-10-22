@@ -51,7 +51,7 @@
               outlined
               v-model="entrySearchWord"
           ></v-text-field>
-          <v-tooltip bottom>
+          <v-tooltip bottom v-if="!isReadOnly">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                   class="ml-3"
@@ -83,6 +83,8 @@
               :key="entry.objectDictionaryEntryId"
               :object-dictionary-entry="entry"
               :is-loading="isLoading"
+              :read-only="isReadOnly"
+              @onDeleted="onEntryDeleted"
               @callEditor="editEntry"
           />
         </v-row>
@@ -219,6 +221,8 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
   }
 
   onDictionaryEntryCreated() {
+    this.snackbarText = "✔ The entry was created successfully 🤩";
+    this.showSnackbar = true;
     this.closeDictionaryEntryCreator();
     this.searchForEntries();
   }
@@ -376,8 +380,18 @@ export default class ObjectDictionaryManager extends ObjectDictionaryManagerProp
     this.isEditingEntry = false;
   }
 
+  private onEntryDeleted() {
+    this.snackbarText = "💣 The entry was deleted successfully. Bye bye entry! 💣";
+    this.showSnackbar = true;
+    this.searchForEntries();
+  }
+
   private onDictionaryEntryEdited() {
     this.closeDictionaryEntryEditor();
+  }
+
+  get isReadOnly() : boolean {
+    return this.readOnly;
   }
 
 }
