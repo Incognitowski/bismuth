@@ -3,6 +3,7 @@ import {RootState} from "@/store";
 import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
+import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
 
 export enum IntentAction {
     // PROJECT RELATED INTENTS
@@ -60,6 +61,7 @@ export interface IntentsState {
     newApplicationIntent: Intent<ApplicationPOTO> | null,
     newObjectDictionaryIntent: Intent<ApplicationPOTO> | null,
     newHttpAPIIntent: Intent<ApplicationPOTO> | null,
+    editHttpAPIIntent: Intent<HttpAPIPOTO> | null,
     editObjectDictionaryIntent: Intent<ObjectDictionaryPOTO> | null,
 }
 
@@ -74,6 +76,7 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         newObjectDictionaryIntent: null,
         editObjectDictionaryIntent: null,
         newHttpAPIIntent: null,
+        editHttpAPIIntent: null
     },
     mutations: {
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
@@ -180,6 +183,19 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         clearNewHttpAPIIntent(state) {
             state.newHttpAPIIntent = null;
         },
+        setEditHttpAPIIntent(state, intent: Intent<HttpAPIPOTO>) {
+            state.editHttpAPIIntent = intent;
+        },
+        resolveEditHttpAPIIntent(state, result: IntentResult) {
+            if (state.editHttpAPIIntent) {
+                state.editHttpAPIIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on editHttpAPIIntent with empty intent")
+            }
+        },
+        clearEditHttpAPIIntent(state) {
+            state.editHttpAPIIntent = null;
+        },
     },
     actions: {
         setGlobalLoadingState(context, shouldLoad: boolean) {
@@ -264,6 +280,16 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearNewHttpAPIIntent(context) {
             context.commit("clearNewHttpAPIIntent")
+        },
+        setEditHttpAPIIntent(context, intent: Intent<HttpAPIPOTO>) {
+            context.commit("setEditHttpAPIIntent", intent)
+        },
+        resolveEditHttpAPIIntent(context, result: IntentResult) {
+            context.commit("resolveEditHttpAPIIntent", result);
+            context.commit("clearEditHttpAPIIntent");
+        },
+        clearEditHttpAPIIntent(context) {
+            context.commit("clearEditObjectDictionaryIntent")
         },
     },
 }

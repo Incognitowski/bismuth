@@ -1,7 +1,7 @@
 import HttpProvider from "@/providers/HttpProvider";
 import {AxiosResponse} from "axios";
-import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
 import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
+import HttpAPIRequestPOTO from "@/domains/artifacts/httpAPI/HttpAPIRequestPOTO";
 
 export default class HttpAPIREST {
 
@@ -16,7 +16,7 @@ export default class HttpAPIREST {
         applicationId: string,
     ): Promise<AxiosResponse<Array<HttpAPIPOTO>>> {
         return this.httpProvider.authInstance.get(
-            "/project/" + projectId + "/application/" + applicationId + "/http-api"
+            `/project/${projectId}/application/${applicationId}/http-api`
         );
     }
 
@@ -26,9 +26,40 @@ export default class HttpAPIREST {
         httpAPI: HttpAPIPOTO
     ): Promise<AxiosResponse<HttpAPIPOTO>> {
         return this.httpProvider.authInstance.post(
-            "/project/" + projectId + "/application/" + applicationId + "/http-api",
+            `/project/${projectId}/application/${applicationId}/http-api`,
             httpAPI
         );
     }
 
+    async getHttpAPI(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string
+    ): Promise<AxiosResponse<HttpAPIPOTO>> {
+        return this.httpProvider.authInstance.get(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpAPIId}`
+        );
+    }
+
+    async searchForRequestsWithSearchWord(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string,
+        requestsSearchWord: string
+    ): Promise<AxiosResponse<Array<HttpAPIRequestPOTO>>> {
+        return this.httpProvider.authInstance.get(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpAPIId}/request/search-by-word/${encodeURIComponent(requestsSearchWord)}`
+        );
+    }
+
+
+    async searchForRequests(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string
+    ): Promise<AxiosResponse<Array<HttpAPIRequestPOTO>>> {
+        return this.httpProvider.authInstance.get(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpAPIId}/request`
+        );
+    }
 }

@@ -24,4 +24,28 @@ export default class HttpAPIAPI {
         return await this.httpAPIREST.getHttpAPIsInApp(projectId, applicationId);
     }
 
+    public async getHttpAPI(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string
+    ) {
+        return await this.httpAPIREST.getHttpAPI(projectId, applicationId, httpAPIId);
+    }
+
+    public async searchForRequestsWithSearchWord(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string,
+        requestsSearchWord: string
+    ) {
+        return await this.httpAPIREST.searchForRequestsWithSearchWord(projectId, applicationId, httpAPIId, requestsSearchWord);
+    }
+
+    public async searchForRequests(
+        projectId: string,
+        applicationId: string,
+        httpAPIId: string
+    ) {
+        return await this.httpAPIREST.searchForRequests(projectId, applicationId, httpAPIId);
+    }
 }

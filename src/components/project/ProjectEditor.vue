@@ -155,7 +155,7 @@
                           <v-icon>fas fa-user-times</v-icon>
                         </v-btn>
                       </template>
-                      <span>Properties</span>
+                      <span>Remove User</span>
                     </v-tooltip>
                   </td>
                   <td></td>

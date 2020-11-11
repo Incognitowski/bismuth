@@ -15,6 +15,7 @@
 
     <!-- HTTP API RELATED COMPONENTS -->
     <HttpAPICreator v-if="isCreatingNewHttpAPI"/>
+    <HttpAPIManagerDrawer v-if="isEditingHttpAPI"/>
 
   </div>
 </template>
@@ -32,9 +33,12 @@ import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 import ObjectDictionaryCreator from "@/components/objectDictionary/ObjectDictionaryCreator.vue";
 import HttpAPICreator from "@/components/httpAPI/HttpAPICreator.vue";
 import ObjectDictionaryManagerDrawer from "@/components/objectDictionary/ObjectDictionaryManagerDrawer.vue";
+import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
+import HttpAPIManagerDrawer from "@/components/httpAPI/HttpAPIManagerDrawer.vue";
 
 @Component({
   components: {
+    HttpAPIManagerDrawer,
     ObjectDictionaryManagerDrawer,
     HttpAPICreator,
     ObjectDictionaryCreator,
@@ -58,6 +62,7 @@ export default class ActionHolder extends Vue {
   isEditingObjectManager: boolean = false;
 
   isCreatingNewHttpAPI: boolean = false;
+  isEditingHttpAPI: boolean = false;
 
   get newProjectIntent() {
     return this.$store.state.appIntents.newProjectIntent;
@@ -89,6 +94,10 @@ export default class ActionHolder extends Vue {
 
   get newHttpAPIIntent() {
     return this.$store.state.appIntents.newHttpAPIIntent;
+  }
+
+  get editHttpAPIIntent() {
+    return this.$store.state.appIntents.editHttpAPIIntent;
   }
 
   @Watch('disableProjectIntent')
@@ -185,6 +194,18 @@ export default class ActionHolder extends Vue {
       return;
     }
     this.isCreatingNewHttpAPI = true;
+  }
+
+  @Watch('editHttpAPIIntent')
+  onEditHttpAPIIntentChange(
+      newIntent: Intent<HttpAPIPOTO> | null,
+      oldIntent: Intent<HttpAPIPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isEditingHttpAPI = false;
+      return;
+    }
+    this.isEditingHttpAPI = true;
   }
 
 }

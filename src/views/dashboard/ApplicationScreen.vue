@@ -122,7 +122,8 @@
           <v-list-item-group color="primary">
             <v-list-item
                 v-for="httpAPI in loadedHttpAPIs"
-                :key="httpAPI.httpAPIId"
+                :key="httpAPI.httpApiId"
+                @click="openHttpAPI(httpAPI)"
             >
               <v-list-item-content>
                 <v-list-item-title v-text="httpAPI.name"></v-list-item-title>
@@ -226,7 +227,6 @@ export default class ApplicationScreen extends Vue {
     });
   }
 
-
   openNewArtifactIntent(type: DocumentationTypeHolder) {
     switch (type.type) {
       case ArtifactTypes.OBJECT_DICTIONARY:
@@ -236,7 +236,6 @@ export default class ApplicationScreen extends Vue {
         this.openHttpAPIArtifactCreator();
         break;
         //todo ArtifactTypes.TEXT_DOCUMENT
-        //todo ArtifactTypes.HTTP_API
     }
   }
 
@@ -252,8 +251,20 @@ export default class ApplicationScreen extends Vue {
         this.loadHttpAPIArtifacts();
         break;
         //todo ArtifactTypes.TEXT_DOCUMENT
-        //todo ArtifactTypes.HTTP_API
     }
+  }
+
+  openHttpAPI(httpAPI: HttpAPIPOTO) {
+    httpAPI.application = <ApplicationPOTO>this.currentApplication;
+    const intent: Intent<HttpAPIPOTO> = {
+      payload: httpAPI,
+      action: IntentAction.EDIT_HTTP_API_ARTIFACT,
+      callback: {
+        action: (result: IntentResult) => {
+        }
+      }
+    }
+    this.$store.dispatch("appIntents/setEditHttpAPIIntent", intent);
   }
 
   openObjectDictionary(objectDictionary: ObjectDictionaryPOTO) {
