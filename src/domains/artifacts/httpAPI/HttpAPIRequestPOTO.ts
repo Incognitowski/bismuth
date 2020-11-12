@@ -7,7 +7,8 @@ export default class HttpAPIRequestPOTO extends BaseOwnableModel {
     public method: string = "";
     public description: string = "";
     public parameters: any = [];
-    public request_bodies: any = [];
+    public headers: any = [];
+    public requestBodies: any = [];
     public responses: any = [];
     public httpApiId: string = "";
     public deprecated: boolean = false;

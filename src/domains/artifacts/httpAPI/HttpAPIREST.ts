@@ -62,4 +62,16 @@ export default class HttpAPIREST {
             `/project/${projectId}/application/${applicationId}/http-api/${httpAPIId}/request`
         );
     }
+
+    async createHttpAPIRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpAPIRequest: HttpAPIRequestPOTO
+    ): Promise<AxiosResponse<HttpAPIRequestPOTO>> {
+        return this.httpProvider.authInstance.post(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpApiId}/request`,
+            httpAPIRequest
+        );
+    }
 }

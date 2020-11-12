@@ -82,7 +82,11 @@
         </v-row>
 
         <v-row v-if="isCreatingRequest" justify="center">
-
+          <HttpAPIRequestCreator
+              :http-api="currentHttpAPI"
+              @close="closeRequestCreator"
+              @onCreated="onRequestCreated"
+          />
         </v-row>
 
         <v-row v-if="isEditingRequest" justify="center">
@@ -119,6 +123,7 @@ import HttpAPIPOTO from "../../domains/artifacts/httpAPI/HttpAPIPOTO";
 import HttpAPIRequestPOTO from "@/domains/artifacts/httpAPI/HttpAPIRequestPOTO";
 import HttpAPIAPI from "@/domains/artifacts/httpAPI/HttpAPIAPI";
 import HttpAPIHelp from "@/components/httpAPI/HttpAPIHelp.vue";
+import HttpAPIRequestCreator from "@/components/httpAPI/HttpAPIRequestCreator.vue";
 
 const HttpApiManagerProps = Vue.extend({
   props: {
@@ -140,7 +145,7 @@ interface NavigationItem {
 }
 
 @Component({
-  components: {HttpAPIHelp}
+  components: {HttpAPIRequestCreator, HttpAPIHelp}
 })
 export default class HttpAPIManager extends HttpApiManagerProps {
 
@@ -332,7 +337,16 @@ export default class HttpAPIManager extends HttpApiManagerProps {
   }
 
   openRequestCreator() {
-    console.warn("todo openRequestCreator")
+    this.isCreatingRequest = true;
+  }
+
+  closeRequestCreator() {
+    this.isCreatingRequest = false;
+  }
+
+  onRequestCreated() {
+    this.isCreatingRequest = false;
+    this.searchForHttpAPIRequests();
   }
 
   get isReadOnly(): boolean {

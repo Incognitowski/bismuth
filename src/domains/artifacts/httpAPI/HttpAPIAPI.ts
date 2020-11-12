@@ -1,5 +1,6 @@
 import HttpAPIREST from "@/domains/artifacts/httpAPI/HttpAPIREST";
 import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
+import HttpAPIRequestPOTO from "@/domains/artifacts/httpAPI/HttpAPIRequestPOTO";
 
 export default class HttpAPIAPI {
 
@@ -47,5 +48,14 @@ export default class HttpAPIAPI {
         httpAPIId: string
     ) {
         return await this.httpAPIREST.searchForRequests(projectId, applicationId, httpAPIId);
+    }
+
+    public async createHttpAPIRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpAPIRequest: HttpAPIRequestPOTO
+    ) {
+        return await this.httpAPIREST.createHttpAPIRequest(projectId, applicationId, httpApiId, httpAPIRequest);
     }
 }
