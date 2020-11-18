@@ -65,7 +65,7 @@
                 <v-icon small>fa fa-plus</v-icon>
               </v-btn>
             </template>
-            <span>New Entry</span>
+            <span>New Request</span>
           </v-tooltip>
         </v-row>
         <v-row v-if="isLoadingRequests && !isCreatingRequest && !isEditingRequest" justify="center">
