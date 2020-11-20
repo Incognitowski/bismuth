@@ -77,7 +77,7 @@
           request.
         </v-row>
 
-        <v-row v-if="!isLoadingRequests && !isCreatingRequest && !isEditingRequest && loadedRequests.length > 0"
+        <v-row style="margin-bottom: 100px" v-if="!isLoadingRequests && !isCreatingRequest && !isEditingRequest && loadedRequests.length > 0"
                justify="start" dense>
           <HttpAPIListItem
               v-for="request in loadedRequests"
