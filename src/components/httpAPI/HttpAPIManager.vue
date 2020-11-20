@@ -79,6 +79,15 @@
 
         <v-row v-if="!isLoadingRequests && !isCreatingRequest && !isEditingRequest && loadedRequests.length > 0"
                justify="start" dense>
+          <HttpAPIListItem
+              v-for="request in loadedRequests"
+              :key="request.operationId"
+              :http-api="request"
+              :is-loading="isLoading"
+              :read-only="isReadOnly"
+              @onDeleted="onRequestDeleted"
+              @callEditor="editRequest"
+          />
         </v-row>
 
         <v-row v-if="isCreatingRequest" justify="center">
@@ -90,7 +99,12 @@
         </v-row>
 
         <v-row v-if="isEditingRequest" justify="center">
-
+          <HttpAPIRequestEditor
+              :http-api="currentHttpAPI"
+              :http-api-request="httpAPIRequestToEdit"
+              @close="closeRequestEditor"
+              @onEdited="onRequestEdited"
+          />
         </v-row>
 
       </v-container>
@@ -124,6 +138,8 @@ import HttpAPIRequestPOTO from "@/domains/artifacts/httpAPI/HttpAPIRequestPOTO";
 import HttpAPIAPI from "@/domains/artifacts/httpAPI/HttpAPIAPI";
 import HttpAPIHelp from "@/components/httpAPI/HttpAPIHelp.vue";
 import HttpAPIRequestCreator from "@/components/httpAPI/HttpAPIRequestCreator.vue";
+import HttpAPIListItem from "@/components/httpAPI/HttpAPIListItem.vue";
+import HttpAPIRequestEditor from "@/components/httpAPI/HttpAPIRequestEditor.vue";
 
 const HttpApiManagerProps = Vue.extend({
   props: {
@@ -145,7 +161,7 @@ interface NavigationItem {
 }
 
 @Component({
-  components: {HttpAPIRequestCreator, HttpAPIHelp}
+  components: {HttpAPIRequestEditor, HttpAPIListItem, HttpAPIRequestCreator, HttpAPIHelp}
 })
 export default class HttpAPIManager extends HttpApiManagerProps {
 
@@ -208,7 +224,7 @@ export default class HttpAPIManager extends HttpApiManagerProps {
   }
 
   @Watch("requestsSearchWord")
-  onEntrySearchWordChange(newSearchWord: string, oldSearchWord: string) {
+  onRequestSearchWordChange(newSearchWord: string, oldSearchWord: string) {
     if (newSearchWord.trim() == oldSearchWord.trim()) return;
     if (this.requestSearchTimeout)
       clearTimeout(this.requestSearchTimeout);
@@ -351,6 +367,28 @@ export default class HttpAPIManager extends HttpApiManagerProps {
 
   get isReadOnly(): boolean {
     return this.readOnly;
+  }
+
+  private onRequestDeleted() {
+    this.snackbarText = "💣 The request was deleted successfully. Bye bye request! 💣";
+    this.showSnackbar = true;
+    this.searchForHttpAPIRequests();
+  }
+
+  private editRequest(request: HttpAPIRequestPOTO) {
+    this.isEditingRequest = true;
+    this.httpAPIRequestToEdit = request;
+  }
+
+  closeRequestEditor() {
+    this.isEditingRequest = false;
+  }
+
+  onRequestEdited() {
+    this.isEditingRequest = false;
+    this.snackbarText = "😉 You successfully edited a request. Good Job! 👌";
+    this.showSnackbar = true;
+    this.searchForHttpAPIRequests();
   }
 
 }

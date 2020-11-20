@@ -13,14 +13,14 @@
         </template>
         <span>Return</span>
       </v-tooltip>
-      <h3 class="font-weight-light">Create HTTP Request</h3>
+      <h3 class="font-weight-light">Edit HTTP Request</h3>
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
               icon
               :color="getColorForSaveButton()"
               :disabled="hasRequestInconsistencies()"
-              @click="createHttpAPIRequest"
+              @click="saveHttpAPIRequest"
               v-on="on"
               v-bind="attrs">
             <v-icon small>fas fa-check</v-icon>
@@ -50,25 +50,25 @@
             persistent-hint
             hint="This field serves as an string based identifier so you can query this request more easily."
             outlined
-            v-model="httpAPIRequest.operationId"
+            v-model="httpAPIRequestToEdit.operationId"
         ></v-text-field>
       </v-col>
       <v-col cols="3">
         <v-switch
             style="margin-top: 6px;"
-            v-model="httpAPIRequest.draft"
+            v-model="httpAPIRequestToEdit.draft"
             inset
             :true-value="false"
             :false-value="true"
-            :label="httpAPIRequest.draft ? 'Draft' : 'Published'"
+            :label="httpAPIRequestToEdit.draft ? 'Draft' : 'Published'"
         ></v-switch>
       </v-col>
       <v-col cols="3">
         <v-switch
             style="margin-top: 6px;"
-            v-model="httpAPIRequest.deprecated"
+            v-model="httpAPIRequestToEdit.deprecated"
             inset
-            :label="httpAPIRequest.deprecated ? 'Deprecated' : 'Not Deprecated'"
+            :label="httpAPIRequestToEdit.deprecated ? 'Deprecated' : 'Not Deprecated'"
         ></v-switch>
       </v-col>
     </v-row>
@@ -77,7 +77,7 @@
         <v-autocomplete
             label="Method"
             hide-details
-            v-model="httpAPIRequest.method"
+            v-model="httpAPIRequestToEdit.method"
             :items="['GET','POST','PUT','DELETE','HEAD','OPTIONS','PATCH',]"
             dense
             outlined
@@ -92,7 +92,7 @@
             hint="The URL of your resource"
             outlined
             prefix="https://your-base-url.com/"
-            v-model="httpAPIRequest.path"
+            v-model="httpAPIRequestToEdit.path"
         />
       </v-col>
     </v-row>
@@ -105,7 +105,7 @@
             rows="3"
             hint="Describe the purpose of this HTTP request"
             outlined
-            v-model="httpAPIRequest.description"
+            v-model="httpAPIRequestToEdit.description"
         ></v-textarea>
       </v-col>
     </v-row>
@@ -160,7 +160,7 @@
                 <v-expansion-panel-header disable-icon-rotate>
             <span>
             {{ pathArgument.label }} ({{ pathArgument.name }})
-              <span v-if="pathArgument.name.length > 0 && !httpAPIRequest.path.includes(`{${pathArgument.name}}`)"
+              <span v-if="pathArgument.name.length > 0 && !httpAPIRequestToEdit.path.includes(`{${pathArgument.name}}`)"
                     class="red--text">
                 Invalid
               </span>
@@ -186,7 +186,7 @@
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-row no-gutters class="mb-2"
-                         v-if="pathArgument.name.length > 0 && !httpAPIRequest.path.includes(`{${pathArgument.name}}`)">
+                         v-if="pathArgument.name.length > 0 && !httpAPIRequestToEdit.path.includes(`{${pathArgument.name}}`)">
                     <v-col cols="12">
               <span class="text-caption red--text">
                 Invalid argument name: Request path does not include
@@ -543,17 +543,18 @@ import RequestBody from "@/domains/artifacts/httpAPI/RequestBody";
 import RequestResponse from "@/domains/artifacts/httpAPI/RequestResponse";
 import RequestHeader from "@/domains/artifacts/httpAPI/RequestHeader";
 
-const HttpAPIRequestCreatorProps = Vue.extend({
+const HttpAPIRequestEditorProps = Vue.extend({
   components: {
     PrismEditor
   },
   props: {
     httpApi: Object,
+    httpApiRequest: Object,
   }
 });
 
 @Component
-export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
+export default class HttpAPIRequestCreator extends HttpAPIRequestEditorProps {
 
   selectedTab: any = '';
 
@@ -563,7 +564,7 @@ export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
   isBootstrapping: boolean = true;
 
   currentHttpAPI: HttpAPIPOTO | null = null;
-  httpAPIRequest: HttpAPIRequestPOTO = new HttpAPIRequestPOTO();
+  httpAPIRequestToEdit: HttpAPIRequestPOTO = new HttpAPIRequestPOTO();
 
   pathArguments: Array<PathArgument> = new Array<PathArgument>();
   requestBodies: Array<RequestBody> = new Array<RequestBody>();
@@ -572,7 +573,14 @@ export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
 
   mounted() {
     this.currentHttpAPI = this.httpApi;
+    this.httpAPIRequestToEdit = this.httpApiRequest;
     this.isBootstrapping = false;
+
+    this.pathArguments = <Array<PathArgument>>JSON.parse(this.httpAPIRequestToEdit.parameters);
+    this.requestBodies = <Array<RequestBody>>JSON.parse(this.httpAPIRequestToEdit.requestBodies);
+    this.requestResponses = <Array<RequestResponse>>JSON.parse(this.httpAPIRequestToEdit.responses);
+    this.requestHeaders = <Array<RequestHeader>>JSON.parse(this.httpAPIRequestToEdit.headers);
+
   }
 
   getColorForSaveButton(): string {
@@ -584,18 +592,18 @@ export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
     return this.httpRequestIsInvalid();
   }
 
-  createHttpAPIRequest() {
+  saveHttpAPIRequest() {
     this.isLoading = true;
     this.hasErrors = false;
     const httpAPIRequest: HttpAPIRequestPOTO = this.buildHttpAPIRequest();
     console.log(httpAPIRequest);
-    new HttpAPIAPI().createHttpAPIRequest(
+    new HttpAPIAPI().updateHttpAPIRequest(
         <string>this.$route.params.projectId,
         <string>this.$route.params.applicationId,
         <string>this.currentHttpAPI?.httpApiId,
         httpAPIRequest
     ).then((response: AxiosResponse<HttpAPIRequestPOTO>) => {
-      this.$emit("onCreated");
+      this.$emit("onEdited");
     }).catch((error: AxiosError) => {
       this.hasErrors = true;
       this.errorMessage = ExceptionCommons.parseErrorMessage(error);
@@ -605,7 +613,7 @@ export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
   }
 
   private buildHttpAPIRequest(): HttpAPIRequestPOTO {
-    let httpAPIRequest = this.httpAPIRequest;
+    let httpAPIRequest = this.httpAPIRequestToEdit;
     httpAPIRequest.parameters = JSON.stringify(this.pathArguments);
     httpAPIRequest.headers = JSON.stringify(this.requestHeaders);
     httpAPIRequest.requestBodies = JSON.stringify(this.requestBodies);
@@ -615,13 +623,13 @@ export default class HttpAPIRequestCreator extends HttpAPIRequestCreatorProps {
   }
 
   getSaveButtonTooltip(): string {
-    if (this.httpAPIRequest.operationId.length == 0)
+    if (this.httpAPIRequestToEdit.operationId.length == 0)
       return "Please add an operation id for this request.";
     return "Save"
   }
 
   httpRequestIsInvalid(): boolean {
-    if (this.httpAPIRequest.operationId.length == 0)
+    if (this.httpAPIRequestToEdit.operationId.length == 0)
       return true;
     return false;
   }

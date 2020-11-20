@@ -58,4 +58,22 @@ export default class HttpAPIAPI {
     ) {
         return await this.httpAPIREST.createHttpAPIRequest(projectId, applicationId, httpApiId, httpAPIRequest);
     }
+
+    public async deleteRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpRequestId: string
+    ) {
+        return await this.httpAPIREST.deleteHttpAPIRequest(projectId, applicationId, httpApiId, httpRequestId);
+    }
+
+    public async updateHttpAPIRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpAPIRequest: HttpAPIRequestPOTO
+    ) {
+        return await this.httpAPIREST.updateHttpAPIRequest(projectId, applicationId, httpApiId, httpAPIRequest);
+    }
 }

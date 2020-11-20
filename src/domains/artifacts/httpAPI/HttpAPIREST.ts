@@ -74,4 +74,27 @@ export default class HttpAPIREST {
             httpAPIRequest
         );
     }
+
+    async deleteHttpAPIRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpRequestId: string
+    ): Promise<AxiosResponse> {
+        return this.httpProvider.authInstance.delete(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpApiId}/request/${httpRequestId}`
+        );
+    }
+
+    async updateHttpAPIRequest(
+        projectId: string,
+        applicationId: string,
+        httpApiId: string,
+        httpAPIRequest: HttpAPIRequestPOTO
+    ): Promise<AxiosResponse<HttpAPIRequestPOTO>> {
+        return this.httpProvider.authInstance.put(
+            `/project/${projectId}/application/${applicationId}/http-api/${httpApiId}/request/${httpAPIRequest.httpRequestId}`,
+            httpAPIRequest
+        );
+    }
 }
