@@ -17,6 +17,9 @@
     <HttpAPICreator v-if="isCreatingNewHttpAPI"/>
     <HttpAPIManagerDrawer v-if="isEditingHttpAPI"/>
 
+    <!-- TEXT DOCUMENT RELATED COMPONENTS -->
+    <TextDocumentDrawer v-if="isCreatingTextDocument || isEditingTextDocument"/>
+
   </div>
 </template>
 
@@ -35,9 +38,12 @@ import HttpAPICreator from "@/components/httpAPI/HttpAPICreator.vue";
 import ObjectDictionaryManagerDrawer from "@/components/objectDictionary/ObjectDictionaryManagerDrawer.vue";
 import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
 import HttpAPIManagerDrawer from "@/components/httpAPI/HttpAPIManagerDrawer.vue";
+import TextDocumentDrawer from "@/components/textDocument/TextDocumentDrawer.vue";
+import TextDocumentPOTO from "@/domains/artifacts/textDocument/TextDocumentPOTO";
 
 @Component({
   components: {
+    TextDocumentDrawer,
     HttpAPIManagerDrawer,
     ObjectDictionaryManagerDrawer,
     HttpAPICreator,
@@ -63,6 +69,9 @@ export default class ActionHolder extends Vue {
 
   isCreatingNewHttpAPI: boolean = false;
   isEditingHttpAPI: boolean = false;
+
+  isCreatingTextDocument: boolean = false;
+  isEditingTextDocument: boolean = false;
 
   get newProjectIntent() {
     return this.$store.state.appIntents.newProjectIntent;
@@ -98,6 +107,38 @@ export default class ActionHolder extends Vue {
 
   get editHttpAPIIntent() {
     return this.$store.state.appIntents.editHttpAPIIntent;
+  }
+
+  get newTextDocumentIntent() {
+    return this.$store.state.appIntents.newTextDocumentIntent;
+  }
+
+  get editTextDocumentIntent() {
+    return this.$store.state.appIntents.editTextDocumentIntent;
+  }
+
+  @Watch('newTextDocumentIntent')
+  onNewTextDocumentIntentChange(
+      newIntent: Intent<TextDocumentPOTO> | null,
+      oldIntent: Intent<TextDocumentPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isCreatingTextDocument = false;
+      return;
+    }
+    this.isCreatingTextDocument = true;
+  }
+
+  @Watch('editTextDocumentIntent')
+  onEditTextDocumentIntentChange(
+      newIntent: Intent<TextDocumentPOTO> | null,
+      oldIntent: Intent<TextDocumentPOTO> | null,
+  ) {
+    if (newIntent == null) {
+      this.isEditingTextDocument = false;
+      return;
+    }
+    this.isEditingTextDocument = true;
   }
 
   @Watch('disableProjectIntent')

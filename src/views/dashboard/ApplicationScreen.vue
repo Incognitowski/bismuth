@@ -82,7 +82,7 @@
           <v-progress-circular indeterminate/>
         </v-row>
         <v-row justify="center"
-               v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0 && loadedHttpAPIs.length === 0)">
+               v-if="!isLoadingArtifacts && (loadedObjectDictionaries.length === 0 && loadedHttpAPIs.length === 0 && loadedTextDocuments.length === 0)">
           <p class="font-weight-light text--secondary mt-5 ml-3">No artifact found of this type on this application.</p>
         </v-row>
 
@@ -132,6 +132,30 @@
           </v-list-item-group>
         </v-list>
 
+        <!-- Text Documents -->
+        <v-list
+            dense
+            shaped
+            color="#00000000"
+            v-if="!isLoadingArtifacts && loadedTextDocuments.length > 0"
+        >
+          <v-subheader class="text-center">
+            Text Documents
+          </v-subheader>
+          <v-list-item-group color="primary">
+            <v-list-item
+                v-for="textDocument in loadedTextDocuments"
+                :key="textDocument.textDocumentId"
+                @click="openTextDocumentArtifact(textDocument)"
+            >
+              <v-list-item-content>
+                <v-list-item-title v-text="textDocument.name"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+
+
       </v-col>
 
     </v-row>
@@ -158,6 +182,8 @@ import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDic
 import ExceptionCommons from "@/domains/framework/ExceptionCommons";
 import HttpAPIAPI from "@/domains/artifacts/httpAPI/HttpAPIAPI";
 import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
+import TextDocumentPOTO from "@/domains/artifacts/textDocument/TextDocumentPOTO";
+import TextDocumentAPI from "@/domains/artifacts/textDocument/TextDocumentAPI";
 
 @Component
 export default class ApplicationScreen extends Vue {
@@ -180,6 +206,7 @@ export default class ApplicationScreen extends Vue {
   ];
 
   loadedObjectDictionaries: Array<ObjectDictionaryPOTO> = [];
+  loadedTextDocuments: Array<TextDocumentPOTO> = [];
   loadedHttpAPIs: Array<HttpAPIPOTO> = [];
 
   mounted() {
@@ -235,13 +262,16 @@ export default class ApplicationScreen extends Vue {
       case ArtifactTypes.HTTP_API:
         this.openHttpAPIArtifactCreator();
         break;
-        //todo ArtifactTypes.TEXT_DOCUMENT
+      case ArtifactTypes.TEXT_DOCUMENT:
+        this.openTextDocumentArtifactCreator();
+        break;
     }
   }
 
   loadDocumentsOfType(type: DocumentationTypeHolder) {
     this.loadedObjectDictionaries = [];
     this.loadedHttpAPIs = [];
+    this.loadedTextDocuments = [];
     this.selectedDocumentationType = type;
     switch (type.type) {
       case ArtifactTypes.OBJECT_DICTIONARY:
@@ -250,7 +280,9 @@ export default class ApplicationScreen extends Vue {
       case ArtifactTypes.HTTP_API:
         this.loadHttpAPIArtifacts();
         break;
-        //todo ArtifactTypes.TEXT_DOCUMENT
+      case ArtifactTypes.TEXT_DOCUMENT:
+        this.loadTextDocumentArtifacts();
+        break;
     }
   }
 
@@ -278,6 +310,22 @@ export default class ApplicationScreen extends Vue {
       }
     }
     this.$store.dispatch("appIntents/setEditObjectDictionaryIntent", intent);
+  }
+
+  openTextDocumentArtifact(textDocument: TextDocumentPOTO) {
+    textDocument.application = <ApplicationPOTO>this.currentApplication;
+    console.log(textDocument);
+    const intent: Intent<TextDocumentPOTO> = {
+      payload: textDocument,
+      action: IntentAction.EDIT_TEXT_DOCUMENT_ARTIFACT,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result == IntentResult.INTENT_CANCELLED) return;
+          this.loadTextDocumentArtifacts();
+        }
+      }
+    }
+    this.$store.dispatch("appIntents/setEditTextDocumentIntent", intent);
   }
 
   openObjectDictionaryArtifactCreator() {
@@ -310,6 +358,22 @@ export default class ApplicationScreen extends Vue {
     this.$store.dispatch("appIntents/setNewHttpAPIIntent", intent);
   }
 
+  openTextDocumentArtifactCreator() {
+    const textDocument: TextDocumentPOTO = new TextDocumentPOTO();
+    textDocument.application = <ApplicationPOTO>this.currentApplication;
+    const intent: Intent<TextDocumentPOTO> = {
+      action: IntentAction.NEW_TEXT_DOCUMENT_ARTIFACT,
+      payload: textDocument,
+      callback: {
+        action: (result: IntentResult) => {
+          if (result == IntentResult.INTENT_CANCELLED) return;
+          this.loadTextDocumentArtifacts();
+        }
+      }
+    }
+    this.$store.dispatch("appIntents/setNewTextDocumentIntent", intent);
+  }
+
   private loadObjectDictionaryArtifacts() {
     this.isLoadingArtifacts = true;
     new ObjectDictionaryAPI().getObjectDictionariesInApp(
@@ -339,6 +403,22 @@ export default class ApplicationScreen extends Vue {
       this.isLoadingArtifacts = false;
     })
   }
+
+  private loadTextDocumentArtifacts() {
+    this.isLoadingArtifacts = true;
+    new TextDocumentAPI().getAllInApp(
+        <string>this.currentProject?.projectId,
+        <string>this.currentApplication?.applicationId
+    ).then((response: AxiosResponse<Array<TextDocumentPOTO>>) => {
+      this.loadedTextDocuments = response.data;
+    }).catch((error: AxiosError) => {
+      this.showSnackbar = true;
+      this.snackBarText = ExceptionCommons.parseErrorMessage(error);
+    }).finally(() => {
+      this.isLoadingArtifacts = false;
+    })
+  }
+
 }
 
 </script>

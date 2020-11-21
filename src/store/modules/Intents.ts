@@ -4,6 +4,7 @@ import ProjectPOTO from "@/domains/project/ProjectPOTO";
 import ApplicationPOTO from "@/domains/application/ApplicationPOTO";
 import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
 import HttpAPIPOTO from "@/domains/artifacts/httpAPI/HttpAPIPOTO";
+import TextDocumentPOTO from "@/domains/artifacts/textDocument/TextDocumentPOTO";
 
 export enum IntentAction {
     // PROJECT RELATED INTENTS
@@ -63,6 +64,8 @@ export interface IntentsState {
     newHttpAPIIntent: Intent<ApplicationPOTO> | null,
     editHttpAPIIntent: Intent<HttpAPIPOTO> | null,
     editObjectDictionaryIntent: Intent<ObjectDictionaryPOTO> | null,
+    newTextDocumentIntent: Intent<TextDocumentPOTO> | null,
+    editTextDocumentIntent: Intent<TextDocumentPOTO> | null,
 }
 
 export const AppIntentsState: Module<IntentsState, RootState> = {
@@ -76,9 +79,152 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         newObjectDictionaryIntent: null,
         editObjectDictionaryIntent: null,
         newHttpAPIIntent: null,
-        editHttpAPIIntent: null
+        editHttpAPIIntent: null,
+        newTextDocumentIntent: null,
+        editTextDocumentIntent: null,
+    },
+    actions: {
+        setGlobalLoadingState(context, shouldLoad: boolean) {
+            context.commit('setGlobalLoadingState', shouldLoad);
+        },
+        setNewProjectIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setNewProjectIntent", intent)
+        },
+        resolveNewProjectIntent(context, result: IntentResult) {
+            context.commit("resolveNewProjectIntent", result);
+            context.commit("clearNewProjectIntent");
+        },
+        clearNewProjectIntent(context) {
+            context.commit("clearNewProjectIntent")
+        },
+        setEditProjectIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setEditProjectIntent", intent)
+        },
+        resolveEditProjectIntent(context, result: IntentResult) {
+            context.commit("resolveEditProjectIntent", result);
+            context.commit("clearEditProjectIntent");
+        },
+        clearEditProjectIntent(context) {
+            context.commit("clearEditProjectIntent")
+        },
+        setProjectTransferIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setTransferProjectIntent", intent)
+        },
+        resolveProjectTransferIntent(context, result: IntentResult) {
+            context.commit("resolveTransferProjectIntent", result);
+            context.commit("clearTransferProjectIntent");
+        },
+        clearProjectTransferIntent(context) {
+            context.commit("clearTransferProjectIntent")
+        },
+        setProjectDisableIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setDisableProjectIntent", intent)
+        },
+        resolveProjectDisableIntent(context, result: IntentResult) {
+            context.commit("resolveDisableProjectIntent", result);
+            context.commit("clearDisableProjectIntent");
+        },
+        clearProjectDisableIntent(context) {
+            context.commit("clearTransferProjectIntent")
+        },
+        setNewApplicationIntent(context, intent: Intent<ProjectPOTO>) {
+            context.commit("setNewApplicationIntent", intent)
+        },
+        resolveNewApplicationIntent(context, result: IntentResult) {
+            context.commit("resolveNewApplicationIntent", result);
+            context.commit("clearNewApplicationIntent");
+        },
+        clearNewApplicationIntent(context) {
+            context.commit("clearNewApplicationIntent")
+        },
+        setNewObjectDictionaryIntent(context, intent: Intent<ApplicationPOTO>) {
+            context.commit("setNewObjectDictionaryIntent", intent)
+        },
+        resolveNewObjectDictionaryIntent(context, result: IntentResult) {
+            context.commit("resolveNewObjectDictionaryIntent", result);
+            context.commit("clearNewObjectDictionaryIntent");
+        },
+        clearNewObjectDictionaryIntent(context) {
+            context.commit("clearNewObjectDictionaryIntent")
+        },
+        setEditObjectDictionaryIntent(context, intent: Intent<ObjectDictionaryPOTO>) {
+            context.commit("setEditObjectDictionaryIntent", intent)
+        },
+        resolveEditObjectDictionaryIntent(context, result: IntentResult) {
+            context.commit("resolveEditObjectDictionaryIntent", result);
+            context.commit("clearEditObjectDictionaryIntent");
+        },
+        clearEditObjectDictionaryIntent(context) {
+            context.commit("clearEditObjectDictionaryIntent")
+        },
+        setNewHttpAPIIntent(context, intent: Intent<ApplicationPOTO>) {
+            context.commit("setNewHttpAPIIntent", intent)
+        },
+        resolveNewHttpAPIIntent(context, result: IntentResult) {
+            context.commit("resolveNewHttpAPIIntent", result);
+            context.commit("clearNewHttpAPIIntent");
+        },
+        clearNewHttpAPIIntent(context) {
+            context.commit("clearNewHttpAPIIntent")
+        },
+        setEditHttpAPIIntent(context, intent: Intent<HttpAPIPOTO>) {
+            context.commit("setEditHttpAPIIntent", intent)
+        },
+        resolveEditHttpAPIIntent(context, result: IntentResult) {
+            context.commit("resolveEditHttpAPIIntent", result);
+            context.commit("clearEditHttpAPIIntent");
+        },
+        clearEditHttpAPIIntent(context) {
+            context.commit("clearEditObjectDictionaryIntent")
+        },
+        setNewTextDocumentIntent(context, intent: Intent<TextDocumentPOTO>) {
+            context.commit("setNewTextDocumentIntent", intent)
+        },
+        resolveNewTextDocumentIntent(context, result: IntentResult) {
+            context.commit("resolveNewTextDocumentIntent", result);
+            context.commit("clearNewTextDocumentIntent");
+        },
+        clearNewTextDocumentIntent(context) {
+            context.commit("clearNewHttpAPIIntent")
+        },
+        setEditTextDocumentIntent(context, intent: Intent<TextDocumentPOTO>) {
+            context.commit("setEditTextDocumentIntent", intent)
+        },
+        resolveEditTextDocumentIntent(context, result: IntentResult) {
+            context.commit("resolveEditTextDocumentIntent", result);
+            context.commit("clearEditTextDocumentIntent");
+        },
+        clearEditTextDocumentIntent(context) {
+            context.commit("clearNewHttpAPIIntent")
+        },
     },
     mutations: {
+        setNewTextDocumentIntent(state, intent: Intent<TextDocumentPOTO>) {
+            state.newTextDocumentIntent = intent;
+        },
+        resolveNewTextDocumentIntent(state, result: IntentResult) {
+            if (state.newTextDocumentIntent) {
+                state.newTextDocumentIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on newTextDocumentIntent with empty intent")
+            }
+        },
+        clearNewTextDocumentIntent(state) {
+            state.newTextDocumentIntent = null;
+        },
+        setEditTextDocumentIntent(state, intent: Intent<TextDocumentPOTO>) {
+            state.editTextDocumentIntent = intent;
+        },
+        resolveEditTextDocumentIntent(state, result: IntentResult) {
+            if (state.editTextDocumentIntent) {
+                state.editTextDocumentIntent.callback.action(result);
+            } else {
+                console.warn("ATTEMPT TO CALL .action() on editTextDocumentIntent with empty intent")
+            }
+        },
+        clearEditTextDocumentIntent(state) {
+            state.editTextDocumentIntent = null;
+        },
         setNewProjectIntent(state, intent: Intent<ProjectPOTO>) {
             state.newProjectIntent = intent;
         },
@@ -195,101 +341,6 @@ export const AppIntentsState: Module<IntentsState, RootState> = {
         },
         clearEditHttpAPIIntent(state) {
             state.editHttpAPIIntent = null;
-        },
-    },
-    actions: {
-        setGlobalLoadingState(context, shouldLoad: boolean) {
-            context.commit('setGlobalLoadingState', shouldLoad);
-        },
-        setNewProjectIntent(context, intent: Intent<ProjectPOTO>) {
-            context.commit("setNewProjectIntent", intent)
-        },
-        resolveNewProjectIntent(context, result: IntentResult) {
-            context.commit("resolveNewProjectIntent", result);
-            context.commit("clearNewProjectIntent");
-        },
-        clearNewProjectIntent(context) {
-            context.commit("clearNewProjectIntent")
-        },
-        setEditProjectIntent(context, intent: Intent<ProjectPOTO>) {
-            context.commit("setEditProjectIntent", intent)
-        },
-        resolveEditProjectIntent(context, result: IntentResult) {
-            context.commit("resolveEditProjectIntent", result);
-            context.commit("clearEditProjectIntent");
-        },
-        clearEditProjectIntent(context) {
-            context.commit("clearEditProjectIntent")
-        },
-        setProjectTransferIntent(context, intent: Intent<ProjectPOTO>) {
-            context.commit("setTransferProjectIntent", intent)
-        },
-        resolveProjectTransferIntent(context, result: IntentResult) {
-            context.commit("resolveTransferProjectIntent", result);
-            context.commit("clearTransferProjectIntent");
-        },
-        clearProjectTransferIntent(context) {
-            context.commit("clearTransferProjectIntent")
-        },
-        setProjectDisableIntent(context, intent: Intent<ProjectPOTO>) {
-            context.commit("setDisableProjectIntent", intent)
-        },
-        resolveProjectDisableIntent(context, result: IntentResult) {
-            context.commit("resolveDisableProjectIntent", result);
-            context.commit("clearDisableProjectIntent");
-        },
-        clearProjectDisableIntent(context) {
-            context.commit("clearTransferProjectIntent")
-        },
-        setNewApplicationIntent(context, intent: Intent<ProjectPOTO>) {
-            context.commit("setNewApplicationIntent", intent)
-        },
-        resolveNewApplicationIntent(context, result: IntentResult) {
-            context.commit("resolveNewApplicationIntent", result);
-            context.commit("clearNewApplicationIntent");
-        },
-        clearNewApplicationIntent(context) {
-            context.commit("clearNewApplicationIntent")
-        },
-        setNewObjectDictionaryIntent(context, intent: Intent<ApplicationPOTO>) {
-            context.commit("setNewObjectDictionaryIntent", intent)
-        },
-        resolveNewObjectDictionaryIntent(context, result: IntentResult) {
-            context.commit("resolveNewObjectDictionaryIntent", result);
-            context.commit("clearNewObjectDictionaryIntent");
-        },
-        clearNewObjectDictionaryIntent(context) {
-            context.commit("clearNewObjectDictionaryIntent")
-        },
-        setEditObjectDictionaryIntent(context, intent: Intent<ObjectDictionaryPOTO>) {
-            context.commit("setEditObjectDictionaryIntent", intent)
-        },
-        resolveEditObjectDictionaryIntent(context, result: IntentResult) {
-            context.commit("resolveEditObjectDictionaryIntent", result);
-            context.commit("clearEditObjectDictionaryIntent");
-        },
-        clearEditObjectDictionaryIntent(context) {
-            context.commit("clearEditObjectDictionaryIntent")
-        },
-        setNewHttpAPIIntent(context, intent: Intent<ApplicationPOTO>) {
-            context.commit("setNewHttpAPIIntent", intent)
-        },
-        resolveNewHttpAPIIntent(context, result: IntentResult) {
-            context.commit("resolveNewHttpAPIIntent", result);
-            context.commit("clearNewHttpAPIIntent");
-        },
-        clearNewHttpAPIIntent(context) {
-            context.commit("clearNewHttpAPIIntent")
-        },
-        setEditHttpAPIIntent(context, intent: Intent<HttpAPIPOTO>) {
-            context.commit("setEditHttpAPIIntent", intent)
-        },
-        resolveEditHttpAPIIntent(context, result: IntentResult) {
-            context.commit("resolveEditHttpAPIIntent", result);
-            context.commit("clearEditHttpAPIIntent");
-        },
-        clearEditHttpAPIIntent(context) {
-            context.commit("clearEditObjectDictionaryIntent")
         },
     },
 }
