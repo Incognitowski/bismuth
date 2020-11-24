@@ -321,6 +321,87 @@
 
             </v-tabs>
           </v-tab-item>
+
+          <v-tab-item>
+            <v-row class="mt-2" no-gutters style="width: 100%" justify="end">
+              <v-btn
+                  small
+                  color="green"
+                  :loading="isTryingIt"
+                  @click="tryHttpRequest"
+              >
+                Run
+                <v-icon
+                    right
+                    dark
+                    small
+                >
+                  fas fa-play
+                </v-icon>
+              </v-btn>
+            </v-row>
+            <v-row class="mt-2" no-gutters style="width: 100%" justify="space-between">
+              <v-col cols="6">
+                <v-text-field
+                    outlined
+                    dense
+                    label="URL"
+                    v-model="baseUrl"
+                    :suffix="artifact.path"
+                ></v-text-field>
+                <v-divider v-if="requestArguments.length > 0"/>
+                <h3 class="my-2 font-weight-light" v-if="requestArguments.length > 0">Query Params</h3>
+                <v-text-field
+                    class="mt-2"
+                    outlined
+                    dense
+                    :key="queryParam.name"
+                    v-for="queryParam in requestArguments"
+                    :label="queryParam.name"
+                    :hint="queryParam.description"
+                    v-model="argumentValues[queryParam.name]"
+                ></v-text-field>
+                <v-divider v-if="requestHeaders.length > 0"/>
+                <h3 class="my-2 font-weight-light" v-if="requestHeaders.length > 0">Headers</h3>
+                <v-text-field
+                    class="mt-2"
+                    outlined
+                    dense
+                    v-for="header in requestHeaders"
+                    :key="header.name"
+                    :label="header.name"
+                    :hint="header.description"
+                    v-model="headerValues[header.name]"
+                ></v-text-field>
+                <v-divider v-if="!['GET','HEAD','OPTIONS','DELETE'].includes(artifact.method)"/>
+                <h3 class="my-2 font-weight-light" v-if="!['GET','HEAD','OPTIONS','DELETE'].includes(artifact.method)">
+                  Body</h3>
+                <v-row v-if="!['GET','HEAD','OPTIONS','DELETE'].includes(artifact.method)">
+                  <prism-editor
+                      class="ml-3 my-editor"
+                      :value="latestTryItBody"
+                      :highlight="getEditorHighlightForTryItBody()"
+                      line-numbers
+                  />
+                </v-row>
+              </v-col>
+              <v-col cols="6">
+                <v-row no-gutters style="width: 100%" justify="space-between">
+                  <span class="ml-2">Response</span>
+                  <span v-if="latestTryItResponseCode !== 0">{{ latestTryItResponseCode }}</span>
+                </v-row>
+                  <v-col cols="12">
+                    <prism-editor
+                        class="ml-2 my-editor"
+                        :value="latestTryItResponse"
+                        :highlight="getEditorHighlightForTryItResponse()"
+                        line-numbers
+                    />
+                  </v-col>
+              </v-col>
+            </v-row>
+          </v-tab-item>
+
         </v-tabs>
 
       </v-row>
@@ -396,6 +477,7 @@ import HttpAPIRequestPOTO from "@/domains/artifacts/httpAPI/HttpAPIRequestPOTO";
 import HttpAPIAPI from "@/domains/artifacts/httpAPI/HttpAPIAPI";
 import Prism, {highlight} from "prismjs";
 import {PrismEditor} from "vue-prism-editor";
+import TryItAPI from "@/domains/artifacts/httpAPI/TryItAPI";
 
 const DictionaryEntryListItemProps = Vue.extend({
   components: {
@@ -415,6 +497,8 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
   isDeleting: boolean = false;
   isSendingDeleteRequest: boolean = false;
 
+  isTryingIt: boolean = false;
+
   cardExpanded: boolean = false;
 
   selectedMenuItemIndex: number = 0;
@@ -423,6 +507,16 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
   requestHeaders: Array<RequestHeader> = [];
   requestResponses: Array<RequestResponse> = [];
   requestArguments: Array<PathArgument> = [];
+
+  baseUrl: string = '';
+
+  argumentValues: any = {};
+  headerValues: any = {};
+  body: string = '';
+
+  latestTryItBody: string = '';
+  latestTryItResponse: string = '';
+  latestTryItResponseCode: number = 0;
 
   mounted() {
     this.requestBodies = <Array<RequestBody>>JSON.parse(this.artifact.requestBodies);
@@ -435,6 +529,41 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
     if (!this.artifact.description || this.artifact.description.length == 0)
       return "No description was provided to this request. What a shame, don't you think? 😔";
     return this.artifact.description;
+  }
+
+  getProcessedURL(): string {
+    let copy : HttpAPIRequestPOTO = <HttpAPIRequestPOTO>JSON.parse(JSON.stringify(this.artifact));
+    let copiedUrl: string = copy.path;
+    for (const property in this.argumentValues) {
+      if (copiedUrl.includes("{" + property + "}")){
+        console.log(copiedUrl);
+        console.log("{" + property + "}");
+        console.log(this.argumentValues[property]);
+        copiedUrl = copiedUrl.split("{" + property + "}").join(this.argumentValues[property]);
+      }
+    }
+    console.log(copiedUrl);
+    return copiedUrl;
+  }
+
+  tryHttpRequest() {
+    this.isTryingIt = true;
+    new TryItAPI().try(
+        this.baseUrl,
+        this.artifact.method,
+        this.getProcessedURL(),
+        this.headerValues,
+        this.latestTryItBody
+    ).then(value => {
+      if (value) {
+        this.latestTryItResponseCode = value.status;
+        this.latestTryItResponse = JSON.stringify(value.data);
+      }
+    }).catch((error: AxiosError) => {
+      this.latestTryItResponseCode = <number>error.response?.status;
+      if (error)
+        this.latestTryItResponse = JSON.stringify(error.message);
+    }).finally(() => this.isTryingIt = false)
   }
 
   private deleteEntry() {
@@ -496,6 +625,20 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
     }
   }
 
+  getEditorHighlightForTryItBody() {
+    const code: string = this.latestTryItBody;
+    return () => {
+      return highlight(code, Prism.languages.javascript, 'javascript');
+    }
+  }
+
+  getEditorHighlightForTryItResponse() {
+    const code: string = this.latestTryItResponse;
+    return () => {
+      return highlight(code, Prism.languages.javascript, 'javascript');
+    }
+  }
+
   getEditorHighlighterForRequestBody(requestBodyIndex: number) {
     const code: string = this.requestBodies[requestBodyIndex].structure;
     return () => {
@@ -519,6 +662,8 @@ export default class DictionaryEntryListItem extends DictionaryEntryListItemProp
 .my-editor {
   background: #2d2d2d;
   color: #ccc;
+  max-height: 400px;
+  max-width: 350px;
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;

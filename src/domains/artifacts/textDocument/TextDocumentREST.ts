@@ -1,7 +1,5 @@
 import HttpProvider from "@/providers/HttpProvider";
 import {AxiosResponse} from "axios";
-import ObjectDictionaryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryPOTO";
-import ObjectDictionaryEntryPOTO from "@/domains/artifacts/objectDictionary/ObjectDictionaryEntryPOTO";
 import TextDocumentPOTO from "@/domains/artifacts/textDocument/TextDocumentPOTO";
 
 export default class TextDocumentREST {
